@@ -17,6 +17,9 @@ export default defineConfig({
     esbuild: {
         jsx: 'automatic',
     },
+    optimizeDeps: {
+        include: ['apexcharts', 'react-apexcharts'],
+    },
     resolve: {
         alias: {
             'ziggy-js': resolve(__dirname, 'vendor/tightenco/ziggy'),
