@@ -14,20 +14,27 @@ return new class extends Migration
         Schema::create('digital_profiles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('slug')->unique();
-            $table->string('full_name');
+
+            $table->enum('account_type', ['individual', 'organization']);
+            $table->string('display_name');
             $table->string('job_title')->nullable();
-            $table->string('email');
+            $table->text('short_bio')->nullable();
+
+            $table->string('email')->nullable(); // change to required if needed
             $table->string('phone')->nullable();
             $table->string('whatsapp')->nullable();
             $table->string('website')->nullable();
             $table->string('linkedin')->nullable();
             $table->string('github')->nullable();
             $table->string('location')->nullable();
+
             $table->string('profile_image')->nullable();
             $table->string('template')->default('default');
             $table->boolean('is_public')->default(true);
-            $table->string('qr_code_path')->nullable();
+
+            $table->string('qr_code_url')->nullable();
+            $table->string('slug')->unique();
+
             $table->timestamps();
         });
     }
