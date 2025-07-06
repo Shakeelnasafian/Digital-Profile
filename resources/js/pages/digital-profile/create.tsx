@@ -1,17 +1,25 @@
-import { useForm } from '@inertiajs/react'
-import AppLayout from '@/layouts/app-layout'
-import { Head } from '@inertiajs/react'
-import { type BreadcrumbItem } from '@/types'
+import { Head, useForm } from '@inertiajs/react';
+import AppLayout from '@/layouts/app-layout';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Toggle } from '@/components/ui/toggle';
+import { LoaderCircle } from 'lucide-react';
+import { type BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
     { title: 'Create Digital Profile', href: '/dashboard/profiles/create' },
-]
+];
 
 export default function Create() {
     const { data, setData, post, processing, errors } = useForm({
-        full_name: '',
+        account_type: 'individual',
+        display_name: '',
         job_title: '',
+        short_bio: '',
+        profile_image: null,
         email: '',
         phone: '',
         whatsapp: '',
@@ -19,132 +27,219 @@ export default function Create() {
         linkedin: '',
         github: '',
         location: '',
-        profile_image: null,
         template: 'default',
-    })
+        is_public: true,
+    });
 
-    const submit = (e) => {
-        e.preventDefault()
-        post(route('digital-profiles.store'), {
-            forceFormData: true,
-        })
-    }
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault();
+        post(route('digital-profiles.store'), { forceFormData: true });
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Digital Profile" />
 
-            <form onSubmit={submit} className="space-y-6 w-fit m-5 p-6 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800">
+            <form onSubmit={submit} className="m-5 p-6 space-y-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl">
+            <div className="grid grid-cols-2 gap-4 p-5 m-5">
+                {/* Account Type */}
+                <div>
+                    <Label htmlFor="account_type">Account Type</Label>
+                    <select
+                        id="account_type"
+                        name="account_type"
+                        value={data.account_type}
+                        onChange={(e) => setData('account_type', e.target.value)}
+                        className="w-full h-11 rounded-md border border-gray-300 dark:border-gray-700 px-3 text-sm dark:bg-transparent dark:text-white/90"
+                    >
+                        <option value="individual">Individual</option>
+                        <option value="organization">Organization</option>
+                    </select>
+                    {errors.account_type && <p className="text-sm text-red-500 mt-1">{errors.account_type}</p>}
+                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Full Name */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1.5">Full Name</label>
-                        <input
-                            type="text"
-                            value={data.full_name}
-                            onChange={e => setData('full_name', e.target.value)}
-                            placeholder="John Doe"
-                            className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:ring focus:ring-blue-300/10 dark:border-gray-700 dark:text-white/90 dark:placeholder:text-white/30"
-                        />
-                        {errors.full_name && <p className="text-sm text-red-500 mt-1">{errors.full_name}</p>}
-                    </div>
+                {/* Display Name */}
+                <div>
+                    <Label htmlFor="display_name">Display Name</Label>
+                    <Input
+                        id="display_name"
+                        value={data.display_name}
+                        onChange={(e) => setData('display_name', e.target.value)}
+                        placeholder="John Doe"
+                        autoComplete="off"
+                    />
+                    {errors.display_name && <p className="text-sm text-red-500 mt-1">{errors.display_name}</p>}
+                </div>
 
-                    {/* Email */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <div className="relative">
-                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                                <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M2 4a2 2 0 012-2h12a2 2 0 012 2v0.01l-8 5-8-5V4zM2 6.08V16a2 2 0 002 2h12a2 2 0 002-2V6.08l-7.447 4.67a1 1 0 01-1.106 0L2 6.08z" />
-                                </svg>
-                            </span>
-                            <input
-                                type="email"
-                                name="email"
-                                value={data.email}
-                                onChange={(e) => setData('email', e.target.value)}
-                                className="pl-10 w-full border border-gray-300 rounded-md h-11 text-sm focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="info@gmail.com"
-                            />
-                        </div>
-                    </div>
+                {/* Job Title */}
+                <div>
+                    <Label htmlFor="job_title">Job Title</Label>
+                    <Input
+                        id="job_title"
+                        value={data.job_title}
+                        onChange={(e) => setData('job_title', e.target.value)}
+                        placeholder="Software Engineer"
+                        autoComplete="off"
+                    />
+                    {errors.job_title && <p className="text-sm text-red-500 mt-1">{errors.job_title}</p>}
+                </div>
 
-                    {/* Phone with Country Code on Left */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                        <div className="flex rounded-md shadow-sm">
-                            <select
-                                className="border border-gray-300 text-sm text-gray-700 rounded-l-md px-2 bg-white"
-                                defaultValue="US"
-                            >
-                                <option value="US">US</option>
-                                <option value="AE">UAE</option>
-                                <option value="GB">UK</option>
-                            </select>
-                            <input
-                                type="tel"
-                                name="phone"
-                                value={data.phone}
-                                onChange={(e) => setData('phone', e.target.value)}
-                                className="flex-1 border-t border-b border-r border-gray-300 rounded-r-md h-11 text-sm px-3"
-                                placeholder="+1 (555) 000-0000"
-                            />
-                        </div>
-                    </div>
+               
+                {/* Email */}
+                <div>
+                    <Label htmlFor="email">Email address</Label>
+                    <Input
+                        id="email"
+                        type="email"
+                        value={data.email}
+                        onChange={(e) => setData('email', e.target.value)}
+                        placeholder="email@example.com"
+                        autoComplete="off"
+                    />
+                    {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
+                </div>
 
-                    {/* URL with "http://" Prefix */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">URL</label>
-                        <div className="flex rounded-md shadow-sm">
-                            <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                                http://
-                            </span>
-                            <input
-                                type="text"
-                                value={data.website}
-                                onChange={(e) => setData('website', e.target.value)}
-                                className="flex-1 block w-full h-11 rounded-none rounded-r-md border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="www.example.com"
-                            />
-                        </div>
-                    </div>
+                {/* Phone */}
+                <div>
+                    <Label htmlFor="phone">Phone</Label>
+                    <Input
+                        id="phone"
+                        type="text"
+                        value={data.phone}
+                        onChange={(e) => setData('phone', e.target.value)}
+                        placeholder="+971 55 123 4567"
+                        autoComplete="off"
+                    />
+                    {errors.phone && <p className="text-sm text-red-500 mt-1">{errors.phone}</p>}
+                </div>
 
-                    {/* Website with Copy Button */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
-                        <div className="relative">
-                            <input
-                                type="text"
-                                value={data.website}
-                                onChange={(e) => setData('website', e.target.value)}
-                                className="block w-full h-11 rounded-md border border-gray-300 text-sm pl-4 pr-20 focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="www.tailadmin.com"
-                            />
-                        </div>
-                    </div>
+                {/* WhatsApp */}
+                <div>
+                    <Label htmlFor="whatsapp">WhatsApp</Label>
+                    <Input
+                        id="whatsapp"
+                        type="text"
+                        value={data.whatsapp}
+                        onChange={(e) => setData('whatsapp', e.target.value)}
+                        placeholder="+971 55 000 0000"
+                        autoComplete="off"
+                    />
+                    {errors.whatsapp && <p className="text-sm text-red-500 mt-1">{errors.whatsapp}</p>}
+                </div>
 
-                    {/* Profile Image Upload */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1.5">Profile Image</label>
-                        <input
-                            type="file"
-                            onChange={e => setData('profile_image', e.target.files[0])}
-                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:border file:border-gray-200 file:rounded file:text-sm file:bg-gray-50 hover:file:bg-gray-100 dark:file:border-gray-700 dark:file:bg-gray-800 dark:file:text-white/70"
-                        />
-                    </div>
+                {/* Website */}
+                <div>
+                    <Label htmlFor="website">Website</Label>
+                    <Input
+                        id="website"
+                        type="text"
+                        value={data.website}
+                        onChange={(e) => setData('website', e.target.value)}
+                        placeholder="www.example.com"
+                        autoComplete="off"
+                    />
+                    {errors.website && <p className="text-sm text-red-500 mt-1">{errors.website}</p>}
+                </div>
 
-                    <div className="pt-4">
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
-                        >
-                            Create Profile
-                        </button>
-                    </div>
+                {/* LinkedIn */}
+                <div>
+                    <Label htmlFor="linkedin">LinkedIn</Label>
+                    <Input
+                        id="linkedin"
+                        type="text"
+                        value={data.linkedin}
+                        onChange={(e) => setData('linkedin', e.target.value)}
+                        placeholder="linkedin.com/in/yourname"
+                    />
+                    {errors.linkedin && <p className="text-sm text-red-500 mt-1">{errors.linkedin}</p>}
+                </div>
+
+                {/* GitHub */}
+                <div>
+                    <Label htmlFor="github">GitHub</Label>
+                    <Input
+                        id="github"
+                        type="text"
+                        value={data.github}
+                        onChange={(e) => setData('github', e.target.value)}
+                        placeholder="github.com/username"
+                    />
+                    {errors.github && <p className="text-sm text-red-500 mt-1">{errors.github}</p>}
+                </div>
+
+                {/* Location */}
+                <div>
+                    <Label htmlFor="location">Location</Label>
+                    <Input
+                        id="location"
+                        type="text"
+                        value={data.location}
+                        onChange={(e) => setData('location', e.target.value)}
+                        placeholder="Dubai, UAE"
+                    />
+                    {errors.location && <p className="text-sm text-red-500 mt-1">{errors.location}</p>}
+                </div>
+
+                {/* Template */}
+                <div>
+                    <Label htmlFor="template">Template</Label>
+                    <Input
+                        id="template"
+                        type="text"
+                        value={data.template}
+                        onChange={(e) => setData('template', e.target.value)}
+                        placeholder="default"
+                    />
+                    {errors.template && <p className="text-sm text-red-500 mt-1">{errors.template}</p>}
+                </div>
+
+                {/* Is Public */}
+                <div>
+                    <Label htmlFor="profile_image" className='block'>Make profile public</Label>
+                    <Toggle
+                        pressed={data.is_public}
+                        onPressedChange={(val) => setData('is_public', val)}
+                        variant="outline"
+                        className='block'
+                    >
+                        {data.is_public ? 'Public' : 'Private'}
+                    </Toggle>
+                    
+                </div>
+
+                {/* Profile Image */}
+                <div>
+                    <Label htmlFor="profile_image">Profile Image</Label>
+                    <Input
+                        id="profile_image"
+                        type="file"
+                        onChange={(e) => setData('profile_image', e.target.files?.[0] || null)}
+                    />
+                    {errors.profile_image && <p className="text-sm text-red-500 mt-1">{errors.profile_image}</p>}
+                </div>
+
+                 {/* Short Bio */}
+                <div>
+                    <Label htmlFor="short_bio">Short Bio</Label>
+                    <Textarea
+                        id="short_bio"
+                        value={data.short_bio}
+                        onChange={(e) => setData('short_bio', e.target.value)}
+                        placeholder="A brief introduction about yourself..."
+                    />
+                    {errors.short_bio && <p className="text-sm text-red-500 mt-1">{errors.short_bio}</p>}
+                </div>
+
+
+                {/* Submit */}
+                <div className="pt-4">
+                    <Button className="w-full" disabled={processing}>
+                        {processing && <LoaderCircle className="h-4 w-4 animate-spin mr-2" />}
+                        Create Profile
+                    </Button>
+                </div>
                 </div>
             </form>
         </AppLayout>
-    )
+    );
 }
