@@ -18,17 +18,17 @@ class DigitalProfileController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'full_name' => 'required|string|max:255',
-            'job_title' => 'nullable|string|max:255',
+            'display_name' => 'required|string|max:255',
+            'job_title' => 'required|string|max:255',
             'email' => 'required|email',
-            'phone' => 'nullable|string|max:25',
+            'phone' => 'required|string|max:25',
             'whatsapp' => 'nullable|string|max:25',
             'website' => 'nullable|url',
             'linkedin' => 'nullable|url',
             'github' => 'nullable|url',
-            'location' => 'nullable|string|max:255',
-            'profile_image' => 'nullable|image',
-            'template' => 'nullable|string|max:100',
+            'location' => 'required|string|max:255',
+            'profile_image' => 'required|image',
+            'template' => 'required|string|max:100',
         ]);
 
         $slug = Str::slug($data['full_name']) . '-' . Str::random(5);
