@@ -21,6 +21,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profiles/{digitalProfile}/edit', [DigitalProfileController::class, 'edit'])->name('digital-profiles.edit');
     Route::put('/profiles/{digitalProfile}', [DigitalProfileController::class, 'update'])->name('digital-profiles.update');
     Route::delete('/profiles/{digitalProfile}', [DigitalProfileController::class, 'destroy'])->name('digital-profiles.destroy');
+    Route::get('/profiles/{slug}', [DigitalProfileController::class, 'show'])->name('digital-profiles.show');
+
 });
 
 

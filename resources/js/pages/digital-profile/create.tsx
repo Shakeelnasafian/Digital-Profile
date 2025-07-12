@@ -133,7 +133,7 @@ export default function Create() {
                         <Label htmlFor="website">Website</Label>
                         <Input
                             id="website"
-                            type="text"
+                            type="url"
                             value={data.website}
                             onChange={(e) => setData('website', e.target.value)}
                             placeholder="www.example.com"
@@ -147,7 +147,7 @@ export default function Create() {
                         <Label htmlFor="linkedin">LinkedIn</Label>
                         <Input
                             id="linkedin"
-                            type="text"
+                            type="url"
                             value={data.linkedin}
                             onChange={(e) => setData('linkedin', e.target.value)}
                             placeholder="linkedin.com/in/yourname"
@@ -160,7 +160,7 @@ export default function Create() {
                         <Label htmlFor="github">GitHub</Label>
                         <Input
                             id="github"
-                            type="text"
+                            type="url"
                             value={data.github}
                             onChange={(e) => setData('github', e.target.value)}
                             placeholder="github.com/username"
