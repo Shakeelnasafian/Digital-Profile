@@ -37,7 +37,7 @@ export default function Show() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Digital Profile" />
-            <div className="w-lg mx-auto bg-[#f5f1ea] rounded-xl shadow-md overflow-hidden">
+            <div className="w-lg mx-auto bg-[#f5f1ea] rounded-xl shadow-md overflow-hidden mt-3">
                 <div className="p-6 text-center w-full">
                     {profile.profile_image && (
                         <img
@@ -55,22 +55,12 @@ export default function Show() {
                         <p className="text-sm text-[#5a4332] mb-1">{profile.job_title}</p>
                     )}
 
-                    {profile.short_bio && (
-                        <p className="text-sm text-[#715c4a] mb-3">{profile.short_bio}</p>
-                    )}
-
                     <div className="space-y-1 text-sm text-[#5a4332] mt-2">
-                       
+
                         {profile.location && <p><FontAwesomeIcon icon={faLocationDot} className="mr-2" />{profile.location}</p>}
                     </div>
-                    <div>
-                        {profile.qr_code_url && (
-                        <img
-                            src={profile.qr_code_url}
-                            className="w-24 h-24 mx-auto rounded-full border-4 border-[#d4c2b0]"
-                            alt={profile.qr_code_url}
-                        />
-                    )}
+                    <div className="space-y-1 text-sm text-[#5a4332] mt-3 mb-3">
+                        {profile.short_bio && (<p className="text-sm text-[#715c4a] mb-3">{profile.short_bio}</p>)}
 
                     </div>
 
@@ -106,10 +96,10 @@ export default function Show() {
                     )}
 
                     <a
-                        href={`/profile/${profile.slug}`}
+                        href={`/profiles/${profile.slug}`}
                         className="mt-4 inline-block bg-[#9e7c5a] text-white px-6 py-2 rounded-full text-sm font-medium"
                     >
-                        View Public Profile
+                        Share
                     </a>
                 </div>
             </div>

@@ -25,4 +25,16 @@ export default defineConfig({
             'ziggy-js': resolve(__dirname, 'vendor/tightenco/ziggy'),
         },
     },
+    server: {
+        host: '127.0.0.1',   // ✅ Force local host, no Herd
+        port: 5173,          // ✅ Default Vite port
+        https: false,        // ✅ Ensure no Herd SSL
+        watch: {
+            usePolling: true,
+            interval: 300,    // ✅ Stable file watching (Windows-friendly)
+        },
+        hmr: {
+            host: '127.0.0.1',
+        },
+    },
 });

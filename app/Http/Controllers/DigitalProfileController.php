@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Inertia\Inertia;
 use Inertia\Controller;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\DigitalProfile;
 use Illuminate\Support\Facades\Storage;
@@ -14,6 +13,13 @@ class DigitalProfileController extends Controller
 {
     public function create()
     {
+        $existingProfile = DigitalProfile::where('user_id', auth()->id())->first();
+
+        if ($existingProfile) {
+            // Redirect to their profile instead of showing the form again
+            return redirect()->route('digital-profiles.show', $existingProfile->slug);
+        }
+
         return Inertia::render('digital-profile/create');
     }
 
@@ -31,6 +37,7 @@ class DigitalProfileController extends Controller
             'location' => 'required|string|max:255',
             'profile_image' => 'required|image',
             'template' => 'required|string|max:100',
+            'short_bio' => 'nullable|string|max:500',
         ]);
 
         if ($request->hasFile('profile_image')) {
@@ -38,9 +45,9 @@ class DigitalProfileController extends Controller
             $data['profile_image'] = $path;
         }
 
-
         // Set the user_id to the currently authenticated user
         $data['user_id'] = auth()->id();
+
         // Set a default account_type
         $data['account_type'] = 'individual';
 

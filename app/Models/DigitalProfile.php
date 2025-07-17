@@ -25,6 +25,8 @@ class DigitalProfile extends Model
         'is_public',
         'qr_code_path',
         'account_type',
+        'qr_code_url',
+        'short_bio',
     ];
 
     // In App\Models\YourModel.php
@@ -55,9 +57,8 @@ class DigitalProfile extends Model
         return $value ? Storage::disk('public')->url($value) : null;
     }
 
-    // public function getQrCodeUrlAttribute($value): ?string
-    // {
-    //     //dd($value);
-    //     return $value ? Storage::disk('public')->url($value) : null;
-    // }
+    public function getQrCodeUrlAttribute($value): ?string
+    {
+        return $value ? Storage::disk('public')->url($value) : null;
+    }
 }
