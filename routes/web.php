@@ -2,6 +2,7 @@
 
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\DigitalProfileController;
 
 Route::get('/', function () {
@@ -15,16 +16,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/profiles', [DigitalProfileController::class, 'index'])->name('digital-profiles.index');
-    Route::get('/profiles/create', [DigitalProfileController::class, 'create'])->name('digital-profiles.create');
-    Route::post('/profiles', [DigitalProfileController::class, 'store'])->name('digital-profiles.store');
-    Route::get('/profiles/{digitalProfile}/edit', [DigitalProfileController::class, 'edit'])->name('digital-profiles.edit');
-    Route::put('/profiles/{digitalProfile}', [DigitalProfileController::class, 'update'])->name('digital-profiles.update');
-    Route::delete('/profiles/{digitalProfile}', [DigitalProfileController::class, 'destroy'])->name('digital-profiles.destroy');
-    Route::get('/profiles/{slug}', [DigitalProfileController::class, 'show'])->name('digital-profiles.show');
+    Route::resource('profiles', DigitalProfileController::class)
+        ->parameters(['profiles' => 'digitalProfile'])
+        ->names('digital-profiles');
 
+    Route::resource('projects', ProjectController::class)
+        ->parameters(['projects' => 'project'])
+        ->names('projects');
 });
 
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';
