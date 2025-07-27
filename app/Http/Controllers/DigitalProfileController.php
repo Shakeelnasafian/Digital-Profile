@@ -14,7 +14,14 @@ class DigitalProfileController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index() {}
+    public function index()
+    {
+        $profiles = DigitalProfile::where('user_id', auth()->id())->get();
+
+        return Inertia::render('digital-profile/index', [
+            'profiles' => $profiles,
+        ]);
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -57,7 +64,7 @@ class DigitalProfileController extends Controller
         }
 
         // Set the user_id to the currently authenticated user
-        $data['user_id'] = auth()->id();
+        $data['user_id'] = auth()->user()->id();
 
         // Set a default account_type
         $data['account_type'] = 'individual';
@@ -87,7 +94,11 @@ class DigitalProfileController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $profile = DigitalProfile::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+
+        return Inertia::render('digital-profile/edit', [
+            'profile' => $profile,
+        ]);
     }
 
     /**
@@ -95,7 +106,35 @@ class DigitalProfileController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $profile = DigitalProfile::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+
+        $data = $request->validate([
+            'display_name' => 'required|string|max:255',
+            'job_title' => 'required|string|max:255',
+            'email' => 'required|email|unique:digital_profiles,email,' . $profile->id,
+            'phone' => 'required|string|max:25',
+            'whatsapp' => 'nullable|string|max:25',
+            'website' => 'nullable|url',
+            'linkedin' => 'nullable|url',
+            'github' => 'nullable|url',
+            'location' => 'required|string|max:255',
+            'profile_image' => 'nullable|image',
+            'template' => 'required|string|max:100',
+            'short_bio' => 'nullable|string|max:500',
+        ]);
+
+        if ($request->hasFile('profile_image')) {
+            $path = $request->file('profile_image')->store('profiles', 'public');
+            $data['profile_image'] = $path;
+        }
+
+        $profile->update($data);
+
+        // Regenerate QR code after update
+        $this->generateQrCode($profile);
+
+        return redirect()->route('digital-profiles.show', $profile->slug)
+            ->with('success', 'Digital Card updated successfully');
     }
 
     /**
@@ -103,7 +142,17 @@ class DigitalProfileController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $profile = DigitalProfile::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+
+        // Delete the QR code file if it exists
+        if ($profile->qr_code_url) {
+            Storage::disk('public')->delete($profile->qr_code_url);
+        }
+
+        $profile->delete();
+
+        return redirect()->route('digital-profiles.index')
+            ->with('success', 'Digital Card deleted successfully');
     }
 
     private function generateQrCode(DigitalProfile $profile): void
