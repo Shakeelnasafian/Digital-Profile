@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('digital_profiles', function (Blueprint $table) {
+        Schema::create('profiles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
 
-            $table->enum('account_type', ['individual', 'organization']);
             $table->string('display_name');
             $table->string('job_title')->nullable();
             $table->text('short_bio')->nullable();
@@ -44,6 +43,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('digital_profiles');
+        Schema::dropIfExists('profiles');
     }
 };
