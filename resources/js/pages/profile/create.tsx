@@ -15,7 +15,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Create() {
     const { data, setData, post, processing, errors } = useForm({
-        account_type: 'individual',
         display_name: '',
         job_title: '',
         short_bio: '',
@@ -43,21 +42,6 @@ export default function Create() {
             <form onSubmit={submit} className="m-5 p-6 space-y-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl">
 
                 <div className="grid grid-cols-2 gap-4 p-5 m-5 mb-0 pb-0">
-                    {/* Account Type */}
-                    <div>
-                        <Label htmlFor="account_type">Account Type</Label>
-                        <select
-                            id="account_type"
-                            name="account_type"
-                            value={data.account_type}
-                            onChange={(e) => setData('account_type', e.target.value)}
-                            className="w-full h-11 rounded-md border border-gray-300 dark:border-gray-700 px-3 text-sm dark:bg-transparent dark:text-white/90"
-                        >
-                            <option value="individual">Individual</option>
-                            <option value="organization">Organization</option>
-                        </select>
-                        {errors.account_type && <p className="text-sm text-red-500 mt-1">{errors.account_type}</p>}
-                    </div>
 
                     {/* Display Name */}
                     <div>
@@ -181,38 +165,20 @@ export default function Create() {
                         {errors.location && <p className="text-sm text-red-500 mt-1">{errors.location}</p>}
                     </div>
 
+                    {/* Profile Image */}
+                    <div>
+                        <Label htmlFor="profile_image">Profile Image</Label>
+                        <Input
+                            id="profile_image"
+                            type="file"
+                            onChange={(e) => setData('profile_image', e.target.files?.[0] || null)}
+                        />
+                        {errors.profile_image && <p className="text-sm text-red-500 mt-1">{errors.profile_image}</p>}
+                    </div>
+
                 </div>
 
                 <div className='grid grid-cols-1 gap-4 p-5 m-5 mt-0 pb-0'>
-
-                    <div className='grid grid-cols-2 gap-4'>
-                        {/* Template */}
-                        <div>
-                            <Label htmlFor="template">Template</Label>
-                            <Input
-                                id="template"
-                                type="text"
-                                value={data.template}
-                                onChange={(e) => setData('template', e.target.value)}
-                                placeholder="default"
-                            />
-                            {errors.template && <p className="text-sm text-red-500 mt-1">{errors.template}</p>}
-                        </div>
-
-
-
-                        {/* Profile Image */}
-                        <div>
-                            <Label htmlFor="profile_image">Profile Image</Label>
-                            <Input
-                                id="profile_image"
-                                type="file"
-                                onChange={(e) => setData('profile_image', e.target.files?.[0] || null)}
-                            />
-                            {errors.profile_image && <p className="text-sm text-red-500 mt-1">{errors.profile_image}</p>}
-                        </div>
-
-                    </div>
 
                     {/* Short Bio */}
                     <div>

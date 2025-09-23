@@ -6,8 +6,10 @@ use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
-class DigitalProfile extends Model
+class Profile extends Model
 {
+    protected $table = 'profiles';
+    
     protected $fillable = [
         'user_id',
         'slug',
@@ -24,12 +26,9 @@ class DigitalProfile extends Model
         'template',
         'is_public',
         'qr_code_path',
-        'account_type',
         'qr_code_url',
         'short_bio',
     ];
-
-    // In App\Models\YourModel.php
 
     protected static function booted()
     {
@@ -44,7 +43,6 @@ class DigitalProfile extends Model
             $model->slug = strtolower($slug);
         });
     }
-
 
     public function user()
     {

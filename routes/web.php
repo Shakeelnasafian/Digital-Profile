@@ -3,7 +3,7 @@
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProjectController;
-use App\Http\Controllers\DigitalProfileController;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -16,9 +16,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::resource('profiles', DigitalProfileController::class)
-        ->parameters(['profiles' => 'digitalProfile'])
-        ->names('digital-profiles');
+    Route::resource('profile', ProfileController::class)
+        ->parameters(['profile' => 'profile'])
+        ->names('profile');
 
     Route::resource('projects', ProjectController::class)
         ->parameters(['projects' => 'project'])
