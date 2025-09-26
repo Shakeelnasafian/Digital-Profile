@@ -27,7 +27,9 @@ class ProfileController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display the profile creation form or redirect the user to their existing profile.
+     *
+     * @return \Inertia\Response|\Illuminate\Http\RedirectResponse An Inertia response rendering the creation page, or a redirect response to the existing profile's show route.
      */
     public function create()
     {
@@ -42,8 +44,12 @@ class ProfileController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     */
+         * Create a new Profile from the validated request data and redirect to the profile's show page.
+         *
+         * @param \App\Http\Requests\ProfileRequest $request Validated request containing profile attributes.
+         * @param \App\Actions\CreateProfileAction $action Action that handles creation of the Profile.
+         * @return \Illuminate\Http\RedirectResponse Redirect to the created profile's show route with a success flash message.
+         */
     public function store(ProfileRequest $request, CreateProfileAction $action)
     {
         $profile = $action->handle($request);
@@ -53,7 +59,10 @@ class ProfileController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Render the profile detail page for the profile identified by the given slug.
+     *
+     * @param string $slug The profile's slug used to locate the record.
+     * @return \Inertia\Response An Inertia response rendering the profile/show view with the located Profile model.
      */
     public function show(string $slug)
     {
@@ -65,8 +74,11 @@ class ProfileController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
+         * Display the edit form for the specified profile belonging to the authenticated user.
+         *
+         * @param string $id The profile's ID.
+         * @return \Inertia\Response The Inertia response rendering the profile edit page with the profile data.
+         */
     public function edit(string $id)
     {
         $profile = Profile::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
@@ -77,7 +89,11 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified profile with validated data and redirect to its show page.
+     *
+     * @param \App\Http\Requests\ProfileRequest $request Validated profile data.
+     * @param string $id The ID of the profile to update.
+     * @return \Illuminate\Http\RedirectResponse Redirect response to the updated profile's show route.
      */
     public function update(ProfileRequest $request, string $id, UpdateProfileAction $action)
     {
@@ -88,8 +104,15 @@ class ProfileController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
-     */
+         * Delete the authenticated user's profile and its associated QR code file.
+         *
+         * Deletes the profile identified by `$id` only if it belongs to the currently
+         * authenticated user. If the profile has a `qr_code_url`, the corresponding
+         * file is removed from the `public` storage disk before the profile record is deleted.
+         *
+         * @param string $id The ID of the profile to delete.
+         * @return \Illuminate\Http\RedirectResponse Redirect to the profile index with a success flash message.
+         */
     public function destroy(string $id)
     {
         $profile = Profile::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
