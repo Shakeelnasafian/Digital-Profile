@@ -9,12 +9,13 @@ use Illuminate\Support\Facades\Storage;
 class Profile extends Model
 {
     protected $table = 'profiles';
-    
+
     protected $fillable = [
         'user_id',
         'slug',
         'display_name',
         'job_title',
+        'short_bio',
         'email',
         'phone',
         'whatsapp',
@@ -27,7 +28,8 @@ class Profile extends Model
         'is_public',
         'qr_code_path',
         'qr_code_url',
-        'short_bio',
+        'skills',
+        'profile_views',
     ];
 
     protected static function booted()
@@ -49,7 +51,6 @@ class Profile extends Model
         return $this->belongsTo(User::class);
     }
 
-    // Override profile_image accessor
     public function getProfileImageAttribute($value): ?string
     {
         return $value ? Storage::disk('public')->url($value) : null;

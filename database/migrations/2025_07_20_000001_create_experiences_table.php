@@ -8,22 +8,22 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('projects', function (Blueprint $table) {
+        Schema::create('experiences', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('name');
-            $table->text('description')->nullable();
-            $table->string('project_url')->nullable();
-            $table->string('image')->nullable();
-            $table->date('start_date')->nullable();
+            $table->string('company');
+            $table->string('position');
+            $table->string('location')->nullable();
+            $table->date('start_date');
             $table->date('end_date')->nullable();
-            $table->string('status')->default('ongoing'); // planned, ongoing, completed
+            $table->boolean('is_current')->default(false);
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('projects');
+        Schema::dropIfExists('experiences');
     }
 };
