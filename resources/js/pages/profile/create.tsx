@@ -4,13 +4,12 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Toggle } from '@/components/ui/toggle';
 import { LoaderCircle } from 'lucide-react';
 import { type BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Create Digital Profile', href: '/dashboard/profiles/create' },
+    { title: 'Create Digital Card', href: '/profile/create' },
 ];
 
 export default function Create() {
@@ -18,7 +17,8 @@ export default function Create() {
         display_name: '',
         job_title: '',
         short_bio: '',
-        profile_image: null,
+        skills: '',
+        profile_image: null as File | null,
         email: '',
         phone: '',
         whatsapp: '',
@@ -32,20 +32,23 @@ export default function Create() {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('digital-profiles.store'), { forceFormData: true });
+        post(route('profile.store'), { forceFormData: true });
     };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Create Digital Profile" />
+            <Head title="Create Digital Card" />
 
             <form onSubmit={submit} className="m-5 p-6 space-y-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl">
+                <div>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">Create Your Digital Card</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Fill in your details to build your professional digital profile.</p>
+                </div>
 
-                <div className="grid grid-cols-2 gap-4 p-5 m-5 mb-0 pb-0">
-
-                    {/* Display Name */}
+                {/* Section: Basic Info */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <Label htmlFor="display_name">Display Name</Label>
+                        <Label htmlFor="display_name">Display Name *</Label>
                         <Input
                             id="display_name"
                             value={data.display_name}
@@ -53,10 +56,9 @@ export default function Create() {
                             placeholder="John Doe"
                             autoComplete="off"
                         />
-                        {errors.display_name && <p className="text-sm text-red-500 mt-1">{errors.display_name}</p>}
+                        {errors.display_name && <p className="text-xs text-red-500 mt-1">{errors.display_name}</p>}
                     </div>
 
-                    {/* Job Title */}
                     <div>
                         <Label htmlFor="job_title">Job Title</Label>
                         <Input
@@ -66,53 +68,57 @@ export default function Create() {
                             placeholder="Software Engineer"
                             autoComplete="off"
                         />
-                        {errors.job_title && <p className="text-sm text-red-500 mt-1">{errors.job_title}</p>}
+                        {errors.job_title && <p className="text-xs text-red-500 mt-1">{errors.job_title}</p>}
                     </div>
 
-
-                    {/* Email */}
                     <div>
-                        <Label htmlFor="email">Email address</Label>
+                        <Label htmlFor="email">Email Address *</Label>
                         <Input
                             id="email"
                             type="email"
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
-                            placeholder="email@example.com"
+                            placeholder="you@example.com"
                             autoComplete="off"
                         />
-                        {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
+                        {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
                     </div>
 
-                    {/* Phone */}
+                    <div>
+                        <Label htmlFor="location">Location</Label>
+                        <Input
+                            id="location"
+                            value={data.location}
+                            onChange={(e) => setData('location', e.target.value)}
+                            placeholder="Dubai, UAE"
+                        />
+                        {errors.location && <p className="text-xs text-red-500 mt-1">{errors.location}</p>}
+                    </div>
+
                     <div>
                         <Label htmlFor="phone">Phone</Label>
                         <Input
                             id="phone"
-                            type="text"
                             value={data.phone}
                             onChange={(e) => setData('phone', e.target.value)}
                             placeholder="+971 55 123 4567"
                             autoComplete="off"
                         />
-                        {errors.phone && <p className="text-sm text-red-500 mt-1">{errors.phone}</p>}
+                        {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone}</p>}
                     </div>
 
-                    {/* WhatsApp */}
                     <div>
                         <Label htmlFor="whatsapp">WhatsApp</Label>
                         <Input
                             id="whatsapp"
-                            type="text"
                             value={data.whatsapp}
                             onChange={(e) => setData('whatsapp', e.target.value)}
                             placeholder="+971 55 000 0000"
                             autoComplete="off"
                         />
-                        {errors.whatsapp && <p className="text-sm text-red-500 mt-1">{errors.whatsapp}</p>}
+                        {errors.whatsapp && <p className="text-xs text-red-500 mt-1">{errors.whatsapp}</p>}
                     </div>
 
-                    {/* Website */}
                     <div>
                         <Label htmlFor="website">Website</Label>
                         <Input
@@ -120,13 +126,12 @@ export default function Create() {
                             type="url"
                             value={data.website}
                             onChange={(e) => setData('website', e.target.value)}
-                            placeholder="www.example.com"
+                            placeholder="https://yoursite.com"
                             autoComplete="off"
                         />
-                        {errors.website && <p className="text-sm text-red-500 mt-1">{errors.website}</p>}
+                        {errors.website && <p className="text-xs text-red-500 mt-1">{errors.website}</p>}
                     </div>
 
-                    {/* LinkedIn */}
                     <div>
                         <Label htmlFor="linkedin">LinkedIn</Label>
                         <Input
@@ -134,12 +139,11 @@ export default function Create() {
                             type="url"
                             value={data.linkedin}
                             onChange={(e) => setData('linkedin', e.target.value)}
-                            placeholder="linkedin.com/in/yourname"
+                            placeholder="https://linkedin.com/in/yourname"
                         />
-                        {errors.linkedin && <p className="text-sm text-red-500 mt-1">{errors.linkedin}</p>}
+                        {errors.linkedin && <p className="text-xs text-red-500 mt-1">{errors.linkedin}</p>}
                     </div>
 
-                    {/* GitHub */}
                     <div>
                         <Label htmlFor="github">GitHub</Label>
                         <Input
@@ -147,73 +151,68 @@ export default function Create() {
                             type="url"
                             value={data.github}
                             onChange={(e) => setData('github', e.target.value)}
-                            placeholder="github.com/username"
+                            placeholder="https://github.com/username"
                         />
-                        {errors.github && <p className="text-sm text-red-500 mt-1">{errors.github}</p>}
+                        {errors.github && <p className="text-xs text-red-500 mt-1">{errors.github}</p>}
                     </div>
 
-                    {/* Location */}
                     <div>
-                        <Label htmlFor="location">Location</Label>
-                        <Input
-                            id="location"
-                            type="text"
-                            value={data.location}
-                            onChange={(e) => setData('location', e.target.value)}
-                            placeholder="Dubai, UAE"
-                        />
-                        {errors.location && <p className="text-sm text-red-500 mt-1">{errors.location}</p>}
-                    </div>
-
-                    {/* Profile Image */}
-                    <div>
-                        <Label htmlFor="profile_image">Profile Image</Label>
+                        <Label htmlFor="profile_image">Profile Photo</Label>
                         <Input
                             id="profile_image"
                             type="file"
-                            onChange={(e) => setData('profile_image', e.target.files?.[0] || null)}
+                            accept="image/*"
+                            onChange={(e) => setData('profile_image', e.target.files?.[0] ?? null)}
                         />
-                        {errors.profile_image && <p className="text-sm text-red-500 mt-1">{errors.profile_image}</p>}
+                        {errors.profile_image && <p className="text-xs text-red-500 mt-1">{errors.profile_image}</p>}
                     </div>
-
                 </div>
 
-                <div className='grid grid-cols-1 gap-4 p-5 m-5 mt-0 pb-0'>
-
-                    {/* Short Bio */}
-                    <div>
-                        <Label htmlFor="short_bio">Short Bio</Label>
-                        <Textarea
-                            id="short_bio"
-                            value={data.short_bio}
-                            onChange={(e) => setData('short_bio', e.target.value)}
-                            placeholder="A brief introduction about yourself..."
-                        />
-                        {errors.short_bio && <p className="text-sm text-red-500 mt-1">{errors.short_bio}</p>}
-                    </div>
-
-                    {/* Is Public */}
-                    <div>
-                        <Label htmlFor="profile_image" className='block'>Make profile public</Label>
-                        <Toggle
-                            pressed={data.is_public}
-                            onPressedChange={(val) => setData('is_public', val)}
-                            variant="outline"
-                            className='block'
-                        >
-                            {data.is_public ? 'Public' : 'Private'}
-                        </Toggle>
-
-                    </div>
-
-                    {/* Submit */}
-                    <div className="pt-4">
-                        <Button className="w-full" disabled={processing}>
-                            {processing && <LoaderCircle className="h-4 w-4 animate-spin mr-2" />}
-                            Create Profile
-                        </Button>
-                    </div>
+                {/* Bio */}
+                <div>
+                    <Label htmlFor="short_bio">Short Bio</Label>
+                    <Textarea
+                        id="short_bio"
+                        value={data.short_bio}
+                        onChange={(e) => setData('short_bio', e.target.value)}
+                        placeholder="A brief intro about yourself, your passion, and what you do..."
+                        rows={3}
+                    />
+                    {errors.short_bio && <p className="text-xs text-red-500 mt-1">{errors.short_bio}</p>}
                 </div>
+
+                {/* Skills */}
+                <div>
+                    <Label htmlFor="skills">Skills</Label>
+                    <Input
+                        id="skills"
+                        value={data.skills}
+                        onChange={(e) => setData('skills', e.target.value)}
+                        placeholder="React, Laravel, TypeScript, Docker (comma-separated)"
+                        autoComplete="off"
+                    />
+                    <p className="text-xs text-gray-400 mt-1">Enter skills separated by commas</p>
+                    {errors.skills && <p className="text-xs text-red-500 mt-1">{errors.skills}</p>}
+                </div>
+
+                {/* Privacy */}
+                <div className="flex items-center gap-3">
+                    <input
+                        id="is_public"
+                        type="checkbox"
+                        checked={data.is_public}
+                        onChange={(e) => setData('is_public', e.target.checked)}
+                        className="w-4 h-4 rounded border-gray-300"
+                    />
+                    <Label htmlFor="is_public" className="cursor-pointer">
+                        Make my profile public (visible to anyone with the link)
+                    </Label>
+                </div>
+
+                <Button type="submit" className="w-full" disabled={processing}>
+                    {processing && <LoaderCircle className="h-4 w-4 animate-spin mr-2" />}
+                    Create My Digital Card
+                </Button>
             </form>
         </AppLayout>
     );

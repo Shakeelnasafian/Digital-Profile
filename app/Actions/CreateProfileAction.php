@@ -20,7 +20,7 @@ class CreateProfileAction
         }
 
         // Set the user_id to the currently authenticated user
-        $data['user_id'] = auth()->user()->id();
+        $data['user_id'] = auth()->id();
 
         $profile = Profile::create($data);
 

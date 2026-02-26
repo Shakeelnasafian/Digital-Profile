@@ -18,6 +18,9 @@ class UpdateProfileAction
         if ($request->hasFile('profile_image')) {
             $path = $request->file('profile_image')->store('profiles', 'public');
             $data['profile_image'] = $path;
+        } else {
+            // Don't overwrite existing image if none uploaded
+            unset($data['profile_image']);
         }
 
         $profile->update($data);
