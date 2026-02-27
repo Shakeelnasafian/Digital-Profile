@@ -6,8 +6,7 @@
 /public/storage
 /storage/*.key
 /storage/pail
-# /vendor is committed for Vercel deployment (no PHP in Vercel build environment)
-# /vendor
+/vendor
 .env
 .env.backup
 .env.production
