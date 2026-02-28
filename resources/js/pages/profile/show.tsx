@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGithub, faLinkedin, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import { faEnvelope, faPhone, faGlobe, faLocationDot } from '@fortawesome/free-solid-svg-icons';
 import { Button } from '@/components/ui/button';
-import { Pencil, Eye, QrCode, Trash2, ExternalLink } from 'lucide-react';
+import { Pencil, Eye, QrCode, Trash2, ExternalLink, ChevronDown, ChevronUp, Copy, Check } from 'lucide-react';
 
 interface Profile {
     id: number;
@@ -45,6 +45,23 @@ interface Experience {
     is_current: boolean;
 }
 
+interface Education {
+    id: number;
+    institution: string;
+    degree: string;
+    field_of_study?: string;
+    start_year: number;
+    end_year?: number;
+    is_current: boolean;
+}
+
+interface Certification {
+    id: number;
+    title: string;
+    issuer: string;
+    issue_date: string;
+}
+
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
     { title: 'My Profile', href: '#' },
@@ -61,19 +78,60 @@ function formatDate(dateStr?: string) {
     return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 }
 
+function buildSignatureHtml(profile: Profile): string {
+    const profileUrl = `${window.location.origin}/p/${profile.slug}`;
+    const avatarHtml = profile.profile_image
+        ? `<img src="${profile.profile_image}" alt="${profile.display_name}" width="64" height="64" style="border-radius:50%;object-fit:cover;display:block;" />`
+        : `<div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#60a5fa,#818cf8);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#fff;">${(profile.display_name ?? '').charAt(0).toUpperCase()}</div>`;
+
+    const contactParts: string[] = [];
+    if (profile.phone) contactParts.push(`<a href="tel:${profile.phone}" style="color:#374151;text-decoration:none;">${profile.phone}</a>`);
+    if (profile.email) contactParts.push(`<a href="mailto:${profile.email}" style="color:#374151;text-decoration:none;">${profile.email}</a>`);
+
+    return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#374151;">
+  <tr>
+    <td style="padding-right:16px;vertical-align:top;">${avatarHtml}</td>
+    <td style="border-left:3px solid #2563eb;padding-left:16px;vertical-align:top;">
+      <p style="margin:0;font-size:16px;font-weight:700;color:#111827;">${profile.display_name}</p>
+      ${profile.job_title ? `<p style="margin:3px 0 0;color:#2563eb;font-size:13px;">${profile.job_title}</p>` : ''}
+      ${contactParts.length ? `<p style="margin:6px 0 0;font-size:12px;color:#6b7280;">${contactParts.join(' &nbsp;·&nbsp; ')}</p>` : ''}
+      <p style="margin:6px 0 0;font-size:12px;">
+        <a href="${profileUrl}" style="color:#2563eb;text-decoration:none;">View Digital Card &rarr;</a>
+      </p>
+    </td>
+  </tr>
+</table>`;
+}
+
 export default function Show({
     profile,
     projects,
     experiences,
+    educations = [],
+    certifications = [],
 }: {
     profile: Profile;
     projects: Project[];
     experiences: Experience[];
+    educations?: Education[];
+    certifications?: Certification[];
 }) {
     const publicUrl = `/p/${profile.slug}`;
     const skills = profile.skills
         ? profile.skills.split(',').map((s) => s.trim()).filter(Boolean)
         : [];
+
+    const [sigOpen, setSigOpen] = useState(false);
+    const [sigCopied, setSigCopied] = useState(false);
+
+    const signatureHtml = sigOpen ? buildSignatureHtml(profile) : '';
+
+    const handleCopySignature = () => {
+        navigator.clipboard.writeText(signatureHtml).then(() => {
+            setSigCopied(true);
+            setTimeout(() => setSigCopied(false), 2000);
+        });
+    };
 
     const handleDelete = () => {
         if (!confirm('Are you sure you want to delete your digital card? This cannot be undone.')) return;
@@ -132,7 +190,7 @@ export default function Show({
                             ) : (
                                 <div className="w-20 h-20 rounded-full border-4 border-white dark:border-gray-900 shadow-md bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center">
                                     <span className="text-2xl font-bold text-white">
-                                        {profile.display_name.charAt(0).toUpperCase()}
+                                        {(profile.display_name ?? '').charAt(0).toUpperCase()}
                                     </span>
                                 </div>
                             )}
@@ -158,32 +216,32 @@ export default function Show({
 
                         <div className="flex flex-wrap gap-3 mt-4">
                             {profile.email && (
-                                <a href={`mailto:${profile.email}`} className="text-gray-500 dark:text-gray-400 hover:text-blue-600 transition-colors">
+                                <a href={`mailto:${profile.email}`} title={`Email: ${profile.email}`} className="text-gray-500 dark:text-gray-400 hover:text-blue-600 transition-colors">
                                     <FontAwesomeIcon icon={faEnvelope} className="w-5 h-5" />
                                 </a>
                             )}
                             {profile.phone && (
-                                <a href={`tel:${profile.phone}`} className="text-gray-500 dark:text-gray-400 hover:text-blue-600 transition-colors">
+                                <a href={`tel:${profile.phone}`} title={`Phone: ${profile.phone}`} className="text-gray-500 dark:text-gray-400 hover:text-blue-600 transition-colors">
                                     <FontAwesomeIcon icon={faPhone} className="w-5 h-5" />
                                 </a>
                             )}
                             {profile.whatsapp && (
-                                <a href={`https://wa.me/${profile.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-gray-500 dark:text-gray-400 hover:text-green-600 transition-colors">
+                                <a href={`https://wa.me/${profile.whatsapp.replace(/\D/g, '')}`} title="WhatsApp" target="_blank" rel="noopener noreferrer" className="text-gray-500 dark:text-gray-400 hover:text-green-600 transition-colors">
                                     <FontAwesomeIcon icon={faWhatsapp} className="w-5 h-5" />
                                 </a>
                             )}
                             {profile.linkedin && (
-                                <a href={profile.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-500 dark:text-gray-400 hover:text-blue-600 transition-colors">
+                                <a href={profile.linkedin} title="LinkedIn" target="_blank" rel="noopener noreferrer" className="text-gray-500 dark:text-gray-400 hover:text-blue-600 transition-colors">
                                     <FontAwesomeIcon icon={faLinkedin} className="w-5 h-5" />
                                 </a>
                             )}
                             {profile.github && (
-                                <a href={profile.github} target="_blank" rel="noopener noreferrer" className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                                <a href={profile.github} title="GitHub" target="_blank" rel="noopener noreferrer" className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                                     <FontAwesomeIcon icon={faGithub} className="w-5 h-5" />
                                 </a>
                             )}
                             {profile.website && (
-                                <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-gray-500 dark:text-gray-400 hover:text-blue-600 transition-colors">
+                                <a href={profile.website} title="Website" target="_blank" rel="noopener noreferrer" className="text-gray-500 dark:text-gray-400 hover:text-blue-600 transition-colors">
                                     <FontAwesomeIcon icon={faGlobe} className="w-5 h-5" />
                                 </a>
                             )}
@@ -234,6 +292,54 @@ export default function Show({
                     </div>
                 )}
 
+                {/* Education */}
+                {educations.length > 0 && (
+                    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="font-semibold text-gray-900 dark:text-white">Education</h3>
+                            <Link href="/education" className="text-sm text-blue-600 hover:underline">Manage</Link>
+                        </div>
+                        <div className="space-y-4">
+                            {educations.slice(0, 3).map((edu) => (
+                                <div key={edu.id} className="flex items-start gap-3">
+                                    <div className="w-2 h-2 rounded-full bg-amber-500 mt-2 shrink-0" />
+                                    <div>
+                                        <p className="font-medium text-gray-900 dark:text-white text-sm">
+                                            {edu.degree}{edu.field_of_study ? ` · ${edu.field_of_study}` : ''}
+                                        </p>
+                                        <p className="text-xs text-amber-600 dark:text-amber-400">{edu.institution}</p>
+                                        <p className="text-xs text-gray-400">
+                                            {edu.start_year} — {edu.is_current ? 'Present' : (edu.end_year ?? '')}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                            {educations.length > 3 && (
+                                <Link href="/education" className="text-xs text-blue-600 hover:underline">
+                                    +{educations.length - 3} more
+                                </Link>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Certifications */}
+                {certifications.length > 0 && (
+                    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="font-semibold text-gray-900 dark:text-white">Certifications</h3>
+                            <Link href="/certifications" className="text-sm text-blue-600 hover:underline">Manage</Link>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            {certifications.map((cert) => (
+                                <span key={cert.id} className="text-xs bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 px-3 py-1 rounded-full">
+                                    {cert.title} · {cert.issuer}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* Projects */}
                 {projects.length > 0 && (
                     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
@@ -279,6 +385,67 @@ export default function Show({
                             Copy
                         </Button>
                     </div>
+                </div>
+
+                {/* Email Signature Generator */}
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
+                    <button
+                        type="button"
+                        onClick={() => setSigOpen((o) => !o)}
+                        className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                    >
+                        <div>
+                            <h3 className="font-semibold text-gray-900 dark:text-white">Email Signature</h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                Copy an HTML signature to use in Gmail, Outlook, or Apple Mail
+                            </p>
+                        </div>
+                        {sigOpen ? (
+                            <ChevronUp className="w-5 h-5 text-gray-400 shrink-0" />
+                        ) : (
+                            <ChevronDown className="w-5 h-5 text-gray-400 shrink-0" />
+                        )}
+                    </button>
+
+                    {sigOpen && (
+                        <div className="border-t border-gray-100 dark:border-gray-800 p-5 space-y-4">
+                            {/* Preview */}
+                            <div>
+                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">Preview</p>
+                                <div
+                                    className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4"
+                                    dangerouslySetInnerHTML={{ __html: signatureHtml }}
+                                />
+                            </div>
+
+                            {/* Raw HTML */}
+                            <div>
+                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">HTML Code</p>
+                                <pre className="bg-gray-950 text-green-400 text-xs rounded-xl p-4 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed max-h-48 overflow-y-auto">
+                                    {signatureHtml}
+                                </pre>
+                            </div>
+
+                            {/* Copy button */}
+                            <Button onClick={handleCopySignature} className="flex items-center gap-2">
+                                {sigCopied ? (
+                                    <>
+                                        <Check className="w-4 h-4" />
+                                        Copied!
+                                    </>
+                                ) : (
+                                    <>
+                                        <Copy className="w-4 h-4" />
+                                        Copy HTML
+                                    </>
+                                )}
+                            </Button>
+
+                            <p className="text-xs text-gray-400">
+                                Paste this HTML into your email client's signature editor. In Gmail: Settings → See all settings → Signature → create new → switch to HTML mode.
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
         </AppLayout>

@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, User, FolderOpen, Briefcase } from 'lucide-react';
+import { LayoutGrid, User, FolderOpen, Briefcase, GraduationCap, Award } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -27,6 +27,16 @@ const mainNavItems: NavItem[] = [
         title: 'Experience',
         href: '/experience',
         icon: Briefcase,
+    },
+    {
+        title: 'Education',
+        href: '/education',
+        icon: GraduationCap,
+    },
+    {
+        title: 'Certifications',
+        href: '/certifications',
+        icon: Award,
     },
 ];
 

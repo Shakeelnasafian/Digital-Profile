@@ -33,8 +33,17 @@ class ProfileRequest extends FormRequest
             'profile_image' => $this->isMethod('POST') ? 'nullable|image|max:2048' : 'nullable|image|max:2048',
             'template'      => 'nullable|string|max:100',
             'short_bio'     => 'nullable|string|max:1000',
-            'is_public'     => 'boolean',
-            'skills'        => 'nullable|string|max:2000',
+            'is_public'           => 'boolean',
+            'skills'              => 'nullable|string|max:2000',
+            'twitter'             => 'nullable|url',
+            'instagram'           => 'nullable|url',
+            'youtube'             => 'nullable|url',
+            'tiktok'              => 'nullable|url',
+            'dribbble'            => 'nullable|url',
+            'behance'             => 'nullable|url',
+            'medium'              => 'nullable|url',
+            'availability_status' => 'nullable|in:available,open_to_opportunities,not_available',
+            'scheduling_url'      => 'nullable|url',
         ];
     }
 }

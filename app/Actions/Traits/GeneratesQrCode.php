@@ -10,7 +10,7 @@ trait GeneratesQrCode
 {
     public function generateQrCode(Profile $profile): void
     {
-        $url = route('profile.public', $profile->slug);
+        $url = route('profile.public', $profile->slug) . '?ref=qr';
         $qrImage = QrCode::format('svg')->size(300)->generate($url);
 
         $qrPath = "qr_codes/{$profile->slug}.svg";

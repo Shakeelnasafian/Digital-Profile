@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -r \"Route::\" /c/xampp/htdocs/Digital-Profile/routes/*.php)",
+      "Bash(php artisan tinker --execute='print_r\\(DB::select\\(\"\"PRAGMA table_info\\(projects\\)\"\"\\)\\)')",
+      "Bash(php artisan tinker --execute=\"use Inertia\\\\Inertia; echo get_class\\(new Inertia\\);\")"
+    ]
+  }
+}

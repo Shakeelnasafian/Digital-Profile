@@ -23,9 +23,15 @@ class UpdateProfileAction
             unset($data['profile_image']);
         }
 
+        // If user provided a custom slug, apply it as the profile's URL slug
+        if (!empty($data['custom_slug'])) {
+            $data['slug'] = strtolower($data['custom_slug']);
+        }
+        unset($data['custom_slug']);
+
         $profile->update($data);
 
-        // Regenerate QR code after update
+        // Regenerate QR code after update (slug may have changed)
         $this->generateQrCode($profile);
 
         return $profile;
