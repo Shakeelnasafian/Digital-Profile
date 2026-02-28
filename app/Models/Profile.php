@@ -30,6 +30,15 @@ class Profile extends Model
         'qr_code_url',
         'skills',
         'profile_views',
+        'twitter',
+        'instagram',
+        'youtube',
+        'tiktok',
+        'dribbble',
+        'behance',
+        'medium',
+        'availability_status',
+        'scheduling_url',
     ];
 
     protected static function booted()
@@ -49,6 +58,16 @@ class Profile extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function educations()
+    {
+        return $this->hasMany(Education::class, 'user_id', 'user_id');
+    }
+
+    public function certifications()
+    {
+        return $this->hasMany(Certification::class, 'user_id', 'user_id');
     }
 
     public function getProfileImageAttribute($value): ?string

@@ -5,34 +5,26 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ExperienceController;
+use App\Http\Controllers\EducationController;
+use App\Http\Controllers\CertificationController;
 
-Route::get('/', function () {
-    return Inertia::render('welcome');
-})->name('home');
+// Welcome page
+Route::get('/', fn() => Inertia::render('welcome'))->name('home');
 
-// Public profile page — no auth required
+// Public profile — no auth required
 Route::get('/p/{slug}', [ProfileController::class, 'publicShow'])->name('profile.public');
+Route::get('/p/{slug}/vcard', [ProfileController::class, 'downloadVCard'])->name('profile.vcard');
+
+// Slug availability check — auth only, no email verification needed
+Route::middleware('auth')->group(function () {
+    Route::get('/api/check-slug/{slug}', [ProfileController::class, 'checkSlug'])->name('profile.check-slug');
+});
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        $user = auth()->user();
-        $profile = \App\Models\Profile::where('user_id', $user->id)->first();
-        $projectCount = \App\Models\Project::where('user_id', $user->id)->count();
-        $experienceCount = \App\Models\Experience::where('user_id', $user->id)->count();
-        $profileViews = $profile ? $profile->profile_views : 0;
+    // Dashboard
+    Route::get('dashboard', [ProfileController::class, 'dashboard'])->name('dashboard');
 
-        return Inertia::render('dashboard', [
-            'stats' => [
-                'profile_views'    => $profileViews,
-                'project_count'    => $projectCount,
-                'experience_count' => $experienceCount,
-                'has_profile'      => $profile ? true : false,
-                'profile_slug'     => $profile ? $profile->slug : null,
-            ],
-        ]);
-    })->name('dashboard');
-
-    // Profile (owner views their own profile by slug)
+    // Profile management
     Route::get('profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('profile/create', [ProfileController::class, 'create'])->name('profile.create');
     Route::post('profile', [ProfileController::class, 'store'])->name('profile.store');
@@ -52,6 +44,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('experience', [ExperienceController::class, 'store'])->name('experience.store');
     Route::patch('experience/{experience}', [ExperienceController::class, 'update'])->name('experience.update');
     Route::delete('experience/{experience}', [ExperienceController::class, 'destroy'])->name('experience.destroy');
+
+    // Education (resourceful)
+    Route::resource('education', EducationController::class)
+        ->except(['create', 'edit', 'show']);
+
+    // Certifications (resourceful)
+    Route::resource('certifications', CertificationController::class)
+        ->except(['create', 'edit', 'show']);
 });
 
 require __DIR__ . '/settings.php';

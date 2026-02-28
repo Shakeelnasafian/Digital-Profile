@@ -55,7 +55,7 @@ export default function ProfileIndex({ profiles }: { profiles: Profile[] }) {
                                 <img src={profile.profile_image} alt={profile.display_name} className="w-14 h-14 rounded-full object-cover" />
                             ) : (
                                 <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center">
-                                    <span className="text-xl font-bold text-white">{profile.display_name.charAt(0)}</span>
+                                    <span className="text-xl font-bold text-white">{(profile.display_name ?? '').charAt(0)}</span>
                                 </div>
                             )}
                             <div>
