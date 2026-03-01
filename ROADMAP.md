@@ -361,5 +361,5 @@ _(move tasks here when done)_
 - Use existing Radix UI components from `resources/js/components/ui/` — do not install new UI libraries
 - Use FontAwesome brands (`@fortawesome/free-brands-svg-icons`) for social platform icons
 - Use Lucide React for other icons
-- SQLite DB file is at project root: `digital_profile` (not in `database/` folder)
+- SQLite DB file should be `database/database.sqlite` (ignored by git). If you use a different path, set `DB_DATABASE` in `.env`.
 - After slug change, QR code must be regenerated via `GeneratesQrCode` trait
