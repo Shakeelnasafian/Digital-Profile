@@ -7,6 +7,9 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\EducationController;
 use App\Http\Controllers\CertificationController;
+use App\Http\Controllers\LeadController;
+use App\Http\Controllers\TestimonialController;
+use App\Http\Controllers\ServiceController;
 
 // Welcome page
 Route::get('/', fn() => Inertia::render('welcome'))->name('home');
@@ -14,6 +17,9 @@ Route::get('/', fn() => Inertia::render('welcome'))->name('home');
 // Public profile — no auth required
 Route::get('/p/{slug}', [ProfileController::class, 'publicShow'])->name('profile.public');
 Route::get('/p/{slug}/vcard', [ProfileController::class, 'downloadVCard'])->name('profile.vcard');
+Route::post('/p/{slug}/lead', [LeadController::class, 'store'])->middleware('throttle:5,1')->name('lead.store');
+Route::get('/p/{slug}/testimonial', [TestimonialController::class, 'create'])->name('testimonial.create');
+Route::post('/p/{slug}/testimonial', [TestimonialController::class, 'store'])->name('testimonial.store');
 
 // Slug availability check — auth only, no email verification needed
 Route::middleware('auth')->group(function () {
@@ -52,6 +58,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Certifications (resourceful)
     Route::resource('certifications', CertificationController::class)
         ->except(['create', 'edit', 'show']);
+
+    // Leads
+    Route::get('leads', [LeadController::class, 'index'])->name('leads.index');
+
+    // Testimonials
+    Route::get('testimonials', [TestimonialController::class, 'index'])->name('testimonials.index');
+    Route::patch('testimonials/{testimonial}/approve', [TestimonialController::class, 'approve'])->name('testimonials.approve');
+    Route::delete('testimonials/{testimonial}', [TestimonialController::class, 'destroy'])->name('testimonials.destroy');
+
+    // Services (resourceful)
+    Route::resource('services', ServiceController::class)
+        ->except(['create', 'edit', 'show']);
+
+    // PDF Export
+    Route::get('profile/{profile}/export-pdf', [ProfileController::class, 'exportPdf'])->name('profile.export-pdf');
 });
 
 require __DIR__ . '/settings.php';

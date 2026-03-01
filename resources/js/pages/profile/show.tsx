@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGithub, faLinkedin, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import { faEnvelope, faPhone, faGlobe, faLocationDot } from '@fortawesome/free-solid-svg-icons';
 import { Button } from '@/components/ui/button';
-import { Pencil, Eye, QrCode, Trash2, ExternalLink, ChevronDown, ChevronUp, Copy, Check } from 'lucide-react';
+import { Pencil, Eye, QrCode, Trash2, ExternalLink, ChevronDown, ChevronUp, Copy, Check, FileDown } from 'lucide-react';
 
 interface Profile {
     id: number;
@@ -169,6 +169,12 @@ export default function Show({
                                 Edit Profile
                             </Button>
                         </Link>
+                        <a href={route('profile.export-pdf', profile.id)}>
+                            <Button variant="outline" className="flex items-center gap-2">
+                                <FileDown className="w-4 h-4" />
+                                Export PDF
+                            </Button>
+                        </a>
                         <Button variant="outline" onClick={handleDelete} className="text-red-600 border-red-200 hover:bg-red-50 flex items-center gap-2">
                             <Trash2 className="w-4 h-4" />
                             Delete

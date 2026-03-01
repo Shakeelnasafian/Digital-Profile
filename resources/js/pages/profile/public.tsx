@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faGithub, faLinkedin, faWhatsapp, faXTwitter,
     faInstagram, faYoutube, faTiktok, faDribbble, faBehance, faMedium,
 } from '@fortawesome/free-brands-svg-icons';
 import { faEnvelope, faPhone, faGlobe, faLocationDot, faExternalLink } from '@fortawesome/free-solid-svg-icons';
-import { GraduationCap, Award, ExternalLink, Copy, CalendarDays, Download, Share2 } from 'lucide-react';
+import { GraduationCap, Award, ExternalLink, Copy, CalendarDays, Download, Share2, Star, Package, MessageSquare, CheckCircle2, LoaderCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 interface Profile {
     display_name: string;
@@ -75,6 +79,26 @@ interface Certification {
     expiry_date?: string;
     credential_url?: string;
     credential_id?: string;
+}
+
+interface Testimonial {
+    id: number;
+    reviewer_name: string;
+    reviewer_title?: string;
+    reviewer_company?: string;
+    content: string;
+    rating: number;
+}
+
+interface Service {
+    id: number;
+    title: string;
+    description?: string;
+    starting_price?: string | number | null;
+    currency: string;
+    cta_label?: string;
+    cta_url?: string;
+    sort_order: number;
 }
 
 // ── Theme config ────────────────────────────────────────────────────────────
@@ -196,6 +220,19 @@ const availabilityLabels: Record<string, { label: string; dot: string }> = {
     not_available:         { label: 'Not Available',            dot: 'bg-gray-400' },
 };
 
+function StarDisplay({ rating }: { rating: number }) {
+    return (
+        <div className="flex gap-0.5">
+            {[1, 2, 3, 4, 5].map((s) => (
+                <Star
+                    key={s}
+                    className={`w-4 h-4 ${s <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                />
+            ))}
+        </div>
+    );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function PublicProfile({
@@ -204,23 +241,62 @@ export default function PublicProfile({
     experiences,
     educations,
     certifications,
+    testimonials,
+    services,
 }: {
     profile: Profile;
     projects: Project[];
     experiences: Experience[];
     educations: Education[];
     certifications: Certification[];
+    testimonials: Testimonial[];
+    services: Service[];
 }) {
     const t = themes[profile.template ?? 'default'] ?? themes.default;
     const skills = profile.skills ? profile.skills.split(',').map((s) => s.trim()).filter(Boolean) : [];
     const [copied, setCopied] = useState(false);
+    const [leadOpen, setLeadOpen] = useState(false);
     const availability = profile.availability_status ? availabilityLabels[profile.availability_status] : null;
+
+    // Lead form
+    const { data: leadData, setData: setLeadData, post: postLead, processing: leadProcessing, errors: leadErrors, wasSuccessful: leadSent, reset: resetLead } = useForm({
+        visitor_name:  '',
+        visitor_email: '',
+        visitor_phone: '',
+        message:       '',
+    });
+
+    const submitLead = (e: React.FormEvent) => {
+        e.preventDefault();
+        postLead(route('lead.store', profile.slug), {
+            onSuccess: () => resetLead(),
+        });
+    };
 
     const handleCopyLink = () => {
         navigator.clipboard.writeText(window.location.href).then(() => {
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         });
+    };
+
+    const downloadQrPng = () => {
+        if (!profile.qr_code_url) return;
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.src = profile.qr_code_url;
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width  = img.naturalWidth  || 300;
+            canvas.height = img.naturalHeight || 300;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+            ctx.drawImage(img, 0, 0);
+            const a = document.createElement('a');
+            a.href     = canvas.toDataURL('image/png');
+            a.download = `${profile.slug}-qr.png`;
+            a.click();
+        };
     };
 
     const socialLinks = [
@@ -354,6 +430,46 @@ export default function PublicProfile({
                                     <span key={i} className={`text-sm font-medium px-3 py-1 rounded-full ${t.skill}`}>
                                         {skill}
                                     </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ── Services ── */}
+                    {services.length > 0 && (
+                        <div className={`${t.sectionBg} rounded-2xl p-6`}>
+                            <h2 className={`text-lg font-semibold mb-5 ${t.sectionTitle}`}>
+                                <Package className="inline w-5 h-5 mr-2 opacity-70" />
+                                Services
+                            </h2>
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                {services.map((svc) => (
+                                    <div key={svc.id} className={`rounded-xl p-4 flex flex-col gap-3 ${t.projCard}`}>
+                                        <h3 className={`font-semibold text-sm ${t.projName}`}>{svc.title}</h3>
+
+                                        {svc.description && (
+                                            <p className={`text-xs leading-relaxed line-clamp-3 ${t.subText}`}>
+                                                {svc.description}
+                                            </p>
+                                        )}
+
+                                        {svc.starting_price != null && svc.starting_price !== '' && (
+                                            <span className={`text-xs font-medium px-2.5 py-1 rounded-full w-fit ${t.skill}`}>
+                                                From {svc.currency} {parseFloat(String(svc.starting_price)).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                                            </span>
+                                        )}
+
+                                        {svc.cta_url && (
+                                            <a
+                                                href={svc.cta_url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="mt-auto text-xs text-center bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-2 px-3 transition-colors"
+                                            >
+                                                {svc.cta_label || 'Get Started'}
+                                            </a>
+                                        )}
+                                    </div>
                                 ))}
                             </div>
                         </div>
@@ -493,6 +609,119 @@ export default function PublicProfile({
                         </div>
                     )}
 
+                    {/* ── Testimonials ── */}
+                    {testimonials.length > 0 && (
+                        <div className={`${t.sectionBg} rounded-2xl p-6`}>
+                            <h2 className={`text-lg font-semibold mb-5 ${t.sectionTitle}`}>
+                                <Star className="inline w-5 h-5 mr-2 opacity-70 fill-yellow-400 text-yellow-400" />
+                                What people say
+                            </h2>
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                {testimonials.map((t_item) => (
+                                    <div key={t_item.id} className={`rounded-xl p-4 flex flex-col gap-3 ${t.projCard}`}>
+                                        <StarDisplay rating={t_item.rating} />
+                                        <p className={`text-sm leading-relaxed line-clamp-4 ${t.bio}`}>
+                                            "{t_item.content}"
+                                        </p>
+                                        <div>
+                                            <p className={`font-semibold text-sm ${t.expTitle}`}>{t_item.reviewer_name}</p>
+                                            {(t_item.reviewer_title || t_item.reviewer_company) && (
+                                                <p className={`text-xs ${t.subText}`}>
+                                                    {[t_item.reviewer_title, t_item.reviewer_company].filter(Boolean).join(' · ')}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ── Lead Capture ── */}
+                    <div className={`${t.sectionBg} rounded-2xl p-6`}>
+                        <button
+                            type="button"
+                            onClick={() => setLeadOpen((prev) => !prev)}
+                            className={`flex items-center gap-2 w-full text-left ${t.sectionTitle}`}
+                        >
+                            <MessageSquare className="w-5 h-5 opacity-70" />
+                            <span className="text-lg font-semibold">Get in touch</span>
+                            <span className={`ml-auto text-sm ${t.subText}`}>{leadOpen ? '▲' : '▼'}</span>
+                        </button>
+
+                        {leadOpen && (
+                            <div className="mt-5">
+                                {leadSent ? (
+                                    <div className="flex flex-col items-center text-center py-6 gap-3">
+                                        <CheckCircle2 className="w-10 h-10 text-green-500" />
+                                        <p className={`text-sm ${t.bio}`}>
+                                            Message sent! {profile.display_name} will be in touch.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <form onSubmit={submitLead} className="space-y-4">
+                                        <div className="grid sm:grid-cols-2 gap-4">
+                                            <div>
+                                                <Label htmlFor="visitor_name" className={t.sectionTitle}>Your Name *</Label>
+                                                <Input
+                                                    id="visitor_name"
+                                                    value={leadData.visitor_name}
+                                                    onChange={(e) => setLeadData('visitor_name', e.target.value)}
+                                                    placeholder="Jane Smith"
+                                                    autoComplete="name"
+                                                    className="bg-white text-gray-900 placeholder:text-gray-400 border-gray-300"
+                                                />
+                                                {leadErrors.visitor_name && <p className="text-xs text-red-500 mt-1">{leadErrors.visitor_name}</p>}
+                                            </div>
+                                            <div>
+                                                <Label htmlFor="visitor_email" className={t.sectionTitle}>Email *</Label>
+                                                <Input
+                                                    id="visitor_email"
+                                                    type="email"
+                                                    value={leadData.visitor_email}
+                                                    onChange={(e) => setLeadData('visitor_email', e.target.value)}
+                                                    placeholder="jane@example.com"
+                                                    autoComplete="email"
+                                                    className="bg-white text-gray-900 placeholder:text-gray-400 border-gray-300"
+                                                />
+                                                {leadErrors.visitor_email && <p className="text-xs text-red-500 mt-1">{leadErrors.visitor_email}</p>}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <Label htmlFor="visitor_phone" className={t.sectionTitle}>Phone</Label>
+                                            <Input
+                                                id="visitor_phone"
+                                                value={leadData.visitor_phone}
+                                                onChange={(e) => setLeadData('visitor_phone', e.target.value)}
+                                                placeholder="+1 555 000 0000"
+                                                autoComplete="tel"
+                                                className="bg-white text-gray-900 placeholder:text-gray-400 border-gray-300"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <Label htmlFor="lead_message" className={t.sectionTitle}>Message</Label>
+                                            <Textarea
+                                                id="lead_message"
+                                                value={leadData.message}
+                                                onChange={(e) => setLeadData('message', e.target.value)}
+                                                placeholder="I'd love to discuss..."
+                                                rows={4}
+                                                className="bg-white text-gray-900 placeholder:text-gray-400 border-gray-300"
+                                            />
+                                        </div>
+
+                                        <Button type="submit" disabled={leadProcessing} className="w-full">
+                                            {leadProcessing && <LoaderCircle className="w-4 h-4 animate-spin mr-2" />}
+                                            Send Message
+                                        </Button>
+                                    </form>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
                     {/* ── Share Bar ── */}
                     <div className={`${t.sectionBg} rounded-2xl p-5`}>
                         <div className="flex items-center gap-2 mb-3">
@@ -526,6 +755,17 @@ export default function PublicProfile({
                                 <Download className="w-3.5 h-3.5" />
                                 Save Contact
                             </a>
+
+                            {profile.qr_code_url && (
+                                <button
+                                    type="button"
+                                    onClick={downloadQrPng}
+                                    className={`flex items-center gap-2 text-sm px-3 py-1.5 rounded-full transition-colors ${t.badge}`}
+                                >
+                                    <Download className="w-3.5 h-3.5" />
+                                    Download QR
+                                </button>
+                            )}
                         </div>
                     </div>
 

@@ -70,6 +70,16 @@ class Profile extends Model
         return $this->hasMany(Certification::class, 'user_id', 'user_id');
     }
 
+    public function leads()
+    {
+        return $this->hasMany(Lead::class);
+    }
+
+    public function testimonials()
+    {
+        return $this->hasMany(Testimonial::class);
+    }
+
     public function getProfileImageAttribute($value): ?string
     {
         return $value ? Storage::disk('public')->url($value) : null;
