@@ -43,7 +43,7 @@ Create, manage, and share your professional digital profile and projects with a 
 
 ### Prerequisites
 
-- PHP 8.1+
+- PHP 8.2+
 - Composer
 - Node.js & npm
 - MySQL or compatible DB
@@ -66,7 +66,7 @@ Create, manage, and share your professional digital profile and projects with a 
 	npm install
 	```
 
-4. Copy `.env.example` to `.env` and set your environment variables.
+4. Copy `.env.example` to `.env` and set your environment variables. If using SQLite, set `DB_DATABASE=database/database.sqlite`.
 
 5. Generate app key:
 	```sh
