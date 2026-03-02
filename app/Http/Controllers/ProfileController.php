@@ -20,6 +20,7 @@ use App\Http\Resources\CertificationResource;
 use App\Http\Resources\ServiceResource;
 use App\Http\Resources\TestimonialResource;
 use App\Models\Service;
+use App\Models\Team;
 use App\Models\Testimonial;
 use App\Services\AnalyticsService;
 use App\Services\ProfileCompletionService;
@@ -66,6 +67,7 @@ class ProfileController extends Controller
         $analytics->logView($profile, $request);
 
         $projects = Project::where('user_id', $profile->user_id)
+            ->with('media')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -90,6 +92,9 @@ class ProfileController extends Controller
             ->orderBy('sort_order')
             ->get();
 
+        $team = Team::whereHas('members', fn($q) => $q->where('user_id', $profile->user_id))
+            ->first();
+
         return Inertia::render('profile/public', [
             'profile'        => new ProfileResource($profile),
             'projects'       => ProjectResource::collection($projects),
@@ -98,6 +103,7 @@ class ProfileController extends Controller
             'certifications' => CertificationResource::collection($certifications),
             'testimonials'   => TestimonialResource::collection($testimonials),
             'services'       => ServiceResource::collection($services),
+            'team'           => $team ? ['name' => $team->name, 'slug' => $team->slug, 'logo_url' => $team->logo_url] : null,
         ]);
     }
 
@@ -108,6 +114,7 @@ class ProfileController extends Controller
             ->firstOrFail();
 
         $projects = Project::where('user_id', auth()->id())
+            ->with('media')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -194,6 +201,17 @@ class ProfileController extends Controller
         return response($vcf, 200, [
             'Content-Type'        => 'text/vcard; charset=utf-8',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    public function embed(string $slug)
+    {
+        $profile = Profile::where('slug', $slug)
+            ->where('is_public', true)
+            ->firstOrFail();
+
+        return Inertia::render('profile/embed', [
+            'profile' => new ProfileResource($profile),
         ]);
     }
 

@@ -5,17 +5,19 @@ namespace App\Http\Controllers;
 use Inertia\Inertia;
 use App\Models\Project;
 use Illuminate\Http\Request;
+use App\Http\Resources\ProjectResource;
 
 class ProjectController extends Controller
 {
     public function index()
     {
         $projects = Project::where('user_id', auth()->id())
+            ->with('media')
             ->orderBy('created_at', 'desc')
             ->get();
 
         return Inertia::render('project/index', [
-            'projects' => $projects,
+            'projects' => ProjectResource::collection($projects),
         ]);
     }
 
