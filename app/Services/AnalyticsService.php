@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Profile;
 use App\Models\ProfileViewEvent;
+use App\Notifications\ProfileViewMilestoneNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
@@ -11,7 +12,16 @@ class AnalyticsService
 {
     public function logView(Profile $profile, Request $request): void
     {
+        $before = $profile->profile_views;
         $profile->increment('profile_views');
+        $after = $before + 1;
+
+        foreach ([100, 500, 1000, 5000] as $milestone) {
+            if ($before < $milestone && $after >= $milestone) {
+                $profile->user->notify(new ProfileViewMilestoneNotification($milestone));
+                break;
+            }
+        }
 
         ProfileViewEvent::create([
             'profile_id'  => $profile->id,

@@ -10,12 +10,17 @@ use App\Http\Controllers\CertificationController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\ProjectMediaController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\TeamController;
 
 // Welcome page
 Route::get('/', fn() => Inertia::render('welcome'))->name('home');
 
 // Public profile — no auth required
 Route::get('/p/{slug}', [ProfileController::class, 'publicShow'])->name('profile.public');
+Route::get('/embed/{slug}', [ProfileController::class, 'embed'])->name('profile.embed');
+Route::get('/t/{slug}', [TeamController::class, 'show'])->name('teams.show');
 Route::get('/p/{slug}/vcard', [ProfileController::class, 'downloadVCard'])->name('profile.vcard');
 Route::post('/p/{slug}/lead', [LeadController::class, 'store'])->middleware('throttle:5,1')->name('lead.store');
 Route::get('/p/{slug}/testimonial', [TestimonialController::class, 'create'])->name('testimonial.create');
@@ -45,6 +50,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
     Route::delete('projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
 
+    // Project Media
+    Route::post('projects/{project}/media', [ProjectMediaController::class, 'store'])->name('project-media.store');
+    Route::delete('projects/{project}/media/{media}', [ProjectMediaController::class, 'destroy'])->name('project-media.destroy');
+
     // Experience
     Route::get('experience', [ExperienceController::class, 'index'])->name('experience.index');
     Route::post('experience', [ExperienceController::class, 'store'])->name('experience.store');
@@ -73,6 +82,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // PDF Export
     Route::get('profile/{profile}/export-pdf', [ProfileController::class, 'exportPdf'])->name('profile.export-pdf');
+
+    // Notifications
+    Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::patch('notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+
+    // Teams
+    Route::get('teams', [TeamController::class, 'index'])->name('teams.index');
+    Route::get('teams/create', [TeamController::class, 'create'])->name('teams.create');
+    Route::post('teams', [TeamController::class, 'store'])->name('teams.store');
+    Route::get('teams/{slug}/manage', [TeamController::class, 'manage'])->name('teams.manage');
+    Route::post('teams/{slug}/members', [TeamController::class, 'addMember'])->name('teams.add-member');
+    Route::delete('teams/{slug}/members/{userId}', [TeamController::class, 'removeMember'])->name('teams.remove-member');
+    Route::delete('teams/{slug}', [TeamController::class, 'destroy'])->name('teams.destroy');
 });
 
 require __DIR__ . '/settings.php';

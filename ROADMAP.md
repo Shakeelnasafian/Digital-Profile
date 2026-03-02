@@ -10,7 +10,7 @@
 
 ### P4-T1 — Scheduling Link Integration
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Priority:** MEDIUM
 - **Task:** Add a booking/scheduling link field (Calendly, Cal.com, etc.) to profile.
 - **Files to edit:**
@@ -27,7 +27,7 @@
 
 ### P4-T2 — Team Profiles
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Priority:** LOW (B2B feature, implement last)
 - **Task:** Company/team workspace where multiple member profiles are grouped.
 - **Fields:** team_name, team_slug, logo, description, website
@@ -42,6 +42,33 @@
   - Team owner can invite members by email
   - Public team page shows all member profile cards
   - Members can display team affiliation on their own profile
+
+---
+
+## Phase 5 — Extended Features
+
+### P5-T1 — Notifications System `[x]`
+
+Laravel database notifications (`notifications` table). Triggered on: new lead (`NewLeadNotification`), new testimonial (`NewTestimonialNotification`), profile view milestones at 100/500/1000/5000 (`ProfileViewMilestoneNotification`). Notification bell in sidebar with unread badge count (shared via `HandleInertiaRequests`). Dashboard page at `/notifications` with per-item mark-read and bulk "mark all read".
+
+---
+
+### P5-T2 — Portfolio Media (Project Images/Videos) `[x]`
+
+`project_media` table (project_id, file_path, media_type, sort_order). `ProjectMediaController` handles upload (max 5 per project, jpg/png/gif/webp/mp4/webm, 10MB) and delete. Thumbnail strip on project manage cards with hover-delete. Image/video carousel on public profile project cards with prev/next navigation and dot indicators.
+
+---
+
+### P5-T3 — Profile Embed Widget `[x]`
+
+Standalone iframe-ready page at `GET /embed/{slug}` — minimal card (avatar, name, title, availability dot, top social icons, "View Profile" CTA). Embed panel in profile show page with live preview iframe and copy-to-clipboard iframe snippet.
+
+---
+
+### P5-T4 — Custom Domains `[ ]`
+
+- **Status:** Planned, not yet implemented
+- DNS TXT record verification, `custom_domain` + `domain_verified_at` columns on profiles, `CustomDomainMiddleware` to resolve Host header to profile. Requires production server with wildcard DNS.
 
 ---
 

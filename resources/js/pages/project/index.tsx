@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
@@ -6,12 +6,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { LoaderCircle, Plus, Pencil, Trash2, ExternalLink, FolderOpen } from 'lucide-react';
+import { LoaderCircle, Plus, Pencil, Trash2, ExternalLink, FolderOpen, ImagePlus, X } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
     { title: 'Projects', href: '/projects' },
 ];
+
+interface ProjectMedia {
+    id: number;
+    url: string;
+    media_type: 'image' | 'video';
+    sort_order: number;
+}
 
 interface Project {
     id: number;
@@ -22,6 +29,7 @@ interface Project {
     end_date?: string;
     status: 'planned' | 'ongoing' | 'completed';
     created_at: string;
+    media: ProjectMedia[];
 }
 
 const statusColors: Record<string, string> = {
@@ -43,6 +51,9 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
     const [showModal, setShowModal] = useState(false);
     const [editingProject, setEditingProject] = useState<Project | null>(null);
     const [deletingId, setDeletingId] = useState<number | null>(null);
+    const [uploadingId, setUploadingId] = useState<number | null>(null);
+    const [deletingMediaId, setDeletingMediaId] = useState<number | null>(null);
+    const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
     const { data, setData, post, patch, processing, errors, reset } = useForm(emptyForm);
 
@@ -91,6 +102,36 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
         });
     };
 
+    const handleMediaUpload = (project: Project, files: FileList | null) => {
+        if (!files || files.length === 0) return;
+
+        const remaining = 5 - project.media.length;
+        if (remaining <= 0) return;
+
+        const formData = new FormData();
+        Array.from(files).slice(0, remaining).forEach((file) => {
+            formData.append('files[]', file);
+        });
+
+        setUploadingId(project.id);
+        router.post(route('project-media.store', project.id), formData, {
+            forceFormData: true,
+            onFinish: () => {
+                setUploadingId(null);
+                if (fileInputRefs.current[project.id]) {
+                    fileInputRefs.current[project.id]!.value = '';
+                }
+            },
+        });
+    };
+
+    const handleMediaDelete = (projectId: number, mediaId: number) => {
+        setDeletingMediaId(mediaId);
+        router.delete(route('project-media.destroy', { project: projectId, media: mediaId }), {
+            onFinish: () => setDeletingMediaId(null),
+        });
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Projects" />
@@ -102,7 +143,7 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Projects</h1>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Showcase your work and portfolio</p>
                     </div>
-                    <Button onClick={openCreate} className="flex items-center gap-2">
+                    <Button type="button" onClick={openCreate} className="flex items-center gap-2">
                         <Plus className="w-4 h-4" />
                         Add Project
                     </Button>
@@ -114,7 +155,7 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
                         <FolderOpen className="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" />
                         <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">No projects yet</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-6">Start adding your projects to showcase your work.</p>
-                        <Button onClick={openCreate}>
+                        <Button type="button" onClick={openCreate}>
                             <Plus className="w-4 h-4 mr-2" />
                             Add Your First Project
                         </Button>
@@ -124,61 +165,123 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
                         {projects.map((project) => (
                             <div
                                 key={project.id}
-                                className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5 flex flex-col gap-3 hover:shadow-md transition-shadow"
+                                className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden flex flex-col hover:shadow-md transition-shadow"
                             >
-                                <div className="flex items-start justify-between gap-2">
-                                    <h3 className="font-semibold text-gray-900 dark:text-white text-base leading-tight">{project.name}</h3>
-                                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${statusColors[project.status]}`}>
-                                        {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
-                                    </span>
-                                </div>
-
-                                {project.description && (
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">{project.description}</p>
+                                {/* Media Strip */}
+                                {project.media.length > 0 && (
+                                    <div className="flex gap-1 p-2 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-700 flex-wrap">
+                                        {project.media.map((m) => (
+                                            <div key={m.id} className="relative group w-14 h-14 shrink-0 rounded overflow-hidden bg-gray-200 dark:bg-gray-700">
+                                                {m.media_type === 'image' ? (
+                                                    <img src={m.url} alt="" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <video src={m.url} className="w-full h-full object-cover" muted />
+                                                )}
+                                                <button
+                                                    onClick={() => handleMediaDelete(project.id, m.id)}
+                                                    disabled={deletingMediaId === m.id}
+                                                    className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                                                    title="Remove"
+                                                >
+                                                    {deletingMediaId === m.id
+                                                        ? <LoaderCircle className="w-4 h-4 text-white animate-spin" />
+                                                        : <X className="w-4 h-4 text-white" />
+                                                    }
+                                                </button>
+                                            </div>
+                                        ))}
+                                        {project.media.length < 5 && (
+                                            <button
+                                                onClick={() => fileInputRefs.current[project.id]?.click()}
+                                                className="w-14 h-14 shrink-0 rounded border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors"
+                                                title="Add image"
+                                            >
+                                                {uploadingId === project.id
+                                                    ? <LoaderCircle className="w-4 h-4 animate-spin" />
+                                                    : <Plus className="w-4 h-4" />
+                                                }
+                                            </button>
+                                        )}
+                                    </div>
                                 )}
 
-                                {(project.start_date || project.end_date) && (
-                                    <p className="text-xs text-gray-400 dark:text-gray-500">
-                                        {project.start_date && new Date(project.start_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                                        {project.end_date && ` → ${new Date(project.end_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`}
-                                        {!project.end_date && project.start_date && ' → Present'}
-                                    </p>
-                                )}
+                                <div className="p-5 flex flex-col gap-3 flex-1">
+                                    <div className="flex items-start justify-between gap-2">
+                                        <h3 className="font-semibold text-gray-900 dark:text-white text-base leading-tight">{project.name}</h3>
+                                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${statusColors[project.status]}`}>
+                                            {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+                                        </span>
+                                    </div>
 
-                                <div className="flex items-center gap-2 mt-auto pt-2 border-t border-gray-100 dark:border-gray-800">
-                                    {project.project_url && (
-                                        <a
-                                            href={project.project_url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-xs text-blue-600 dark:text-blue-400 flex items-center gap-1 hover:underline"
-                                        >
-                                            <ExternalLink className="w-3 h-3" />
-                                            View Project
-                                        </a>
+                                    {project.description && (
+                                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">{project.description}</p>
                                     )}
-                                    <div className="ml-auto flex gap-2">
-                                        <button
-                                            onClick={() => openEdit(project)}
-                                            className="p-1.5 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors"
-                                            title="Edit"
-                                        >
-                                            <Pencil className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(project.id)}
-                                            disabled={deletingId === project.id}
-                                            className="p-1.5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors disabled:opacity-50"
-                                            title="Delete"
-                                        >
-                                            {deletingId === project.id ? (
-                                                <LoaderCircle className="w-4 h-4 animate-spin" />
-                                            ) : (
-                                                <Trash2 className="w-4 h-4" />
+
+                                    {(project.start_date || project.end_date) && (
+                                        <p className="text-xs text-gray-400 dark:text-gray-500">
+                                            {project.start_date && new Date(project.start_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                                            {project.end_date && ` → ${new Date(project.end_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`}
+                                            {!project.end_date && project.start_date && ' → Present'}
+                                        </p>
+                                    )}
+
+                                    <div className="flex items-center gap-2 mt-auto pt-2 border-t border-gray-100 dark:border-gray-800">
+                                        {project.project_url && (
+                                            <a
+                                                href={project.project_url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-xs text-blue-600 dark:text-blue-400 flex items-center gap-1 hover:underline"
+                                            >
+                                                <ExternalLink className="w-3 h-3" />
+                                                View Project
+                                            </a>
+                                        )}
+                                        <div className="ml-auto flex gap-2">
+                                            {project.media.length === 0 && (
+                                                <button
+                                                    onClick={() => fileInputRefs.current[project.id]?.click()}
+                                                    className="p-1.5 text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 transition-colors"
+                                                    title="Upload images"
+                                                >
+                                                    {uploadingId === project.id
+                                                        ? <LoaderCircle className="w-4 h-4 animate-spin" />
+                                                        : <ImagePlus className="w-4 h-4" />
+                                                    }
+                                                </button>
                                             )}
-                                        </button>
+                                            <button
+                                                onClick={() => openEdit(project)}
+                                                className="p-1.5 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors"
+                                                title="Edit"
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(project.id)}
+                                                disabled={deletingId === project.id}
+                                                className="p-1.5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors disabled:opacity-50"
+                                                title="Delete"
+                                            >
+                                                {deletingId === project.id ? (
+                                                    <LoaderCircle className="w-4 h-4 animate-spin" />
+                                                ) : (
+                                                    <Trash2 className="w-4 h-4" />
+                                                )}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
+
+                                {/* Hidden file input per project */}
+                                <input
+                                    type="file"
+                                    accept="image/jpg,image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm"
+                                    multiple
+                                    className="hidden"
+                                    ref={(el) => { fileInputRefs.current[project.id] = el; }}
+                                    onChange={(e) => handleMediaUpload(project, e.target.files)}
+                                />
                             </div>
                         ))}
                     </div>
@@ -236,6 +339,7 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
                                 <Label htmlFor="status">Status *</Label>
                                 <select
                                     id="status"
+                                    title="Project status"
                                     value={data.status}
                                     onChange={(e) => setData('status', e.target.value as typeof data.status)}
                                     className="w-full h-10 rounded-md border border-gray-300 dark:border-gray-700 px-3 text-sm dark:bg-gray-900 dark:text-white"

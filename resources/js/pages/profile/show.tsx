@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGithub, faLinkedin, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import { faEnvelope, faPhone, faGlobe, faLocationDot } from '@fortawesome/free-solid-svg-icons';
 import { Button } from '@/components/ui/button';
-import { Pencil, Eye, QrCode, Trash2, ExternalLink, ChevronDown, ChevronUp, Copy, Check, FileDown } from 'lucide-react';
+import { Pencil, Eye, QrCode, Trash2, ExternalLink, ChevronDown, ChevronUp, Copy, Check, FileDown, Code2 } from 'lucide-react';
 
 interface Profile {
     id: number;
@@ -123,8 +123,20 @@ export default function Show({
 
     const [sigOpen, setSigOpen] = useState(false);
     const [sigCopied, setSigCopied] = useState(false);
+    const [embedOpen, setEmbedOpen] = useState(false);
+    const [embedCopied, setEmbedCopied] = useState(false);
 
     const signatureHtml = sigOpen ? buildSignatureHtml(profile) : '';
+
+    const embedUrl    = `${window.location.origin}/embed/${profile.slug}`;
+    const embedIframe = `<iframe src="${embedUrl}" width="440" height="90" frameborder="0" scrolling="no" style="border:none;overflow:hidden;"></iframe>`;
+
+    const handleCopyEmbed = () => {
+        navigator.clipboard.writeText(embedIframe).then(() => {
+            setEmbedCopied(true);
+            setTimeout(() => setEmbedCopied(false), 2000);
+        });
+    };
 
     const handleCopySignature = () => {
         navigator.clipboard.writeText(signatureHtml).then(() => {
@@ -391,6 +403,59 @@ export default function Show({
                             Copy
                         </Button>
                     </div>
+                </div>
+
+                {/* Embed Widget */}
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
+                    <button
+                        type="button"
+                        onClick={() => setEmbedOpen((o) => !o)}
+                        className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                    >
+                        <div>
+                            <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                <Code2 className="w-4 h-4 text-gray-500" />
+                                Embed on Your Website
+                            </h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                Copy an iframe snippet to embed your profile card on any webpage
+                            </p>
+                        </div>
+                        {embedOpen ? (
+                            <ChevronUp className="w-5 h-5 text-gray-400 shrink-0" />
+                        ) : (
+                            <ChevronDown className="w-5 h-5 text-gray-400 shrink-0" />
+                        )}
+                    </button>
+
+                    {embedOpen && (
+                        <div className="border-t border-gray-100 dark:border-gray-800 p-5 space-y-4">
+                            <div>
+                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">Preview</p>
+                                <iframe
+                                    src={embedUrl}
+                                    width="440"
+                                    height="90"
+                                    scrolling="no"
+                                    title="Profile embed preview"
+                                    className="rounded-xl w-full max-w-md border-0 overflow-hidden"
+                                />
+                            </div>
+                            <div>
+                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">iframe Code</p>
+                                <pre className="bg-gray-950 text-green-400 text-xs rounded-xl p-4 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed">
+                                    {embedIframe}
+                                </pre>
+                            </div>
+                            <Button onClick={handleCopyEmbed} className="flex items-center gap-2">
+                                {embedCopied ? (
+                                    <><Check className="w-4 h-4" />Copied!</>
+                                ) : (
+                                    <><Copy className="w-4 h-4" />Copy Embed Code</>
+                                )}
+                            </Button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Email Signature Generator */}

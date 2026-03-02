@@ -19,6 +19,12 @@ class ProjectResource extends JsonResource
             'end_date'    => $this->end_date,
             'status'      => $this->status,
             'created_at'  => $this->created_at,
+            'media'       => $this->whenLoaded('media', fn() => $this->media->map(fn($m) => [
+                'id'         => $m->id,
+                'url'        => $m->url,
+                'media_type' => $m->media_type,
+                'sort_order' => $m->sort_order,
+            ])),
         ];
     }
 }

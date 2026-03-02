@@ -39,6 +39,13 @@ interface Profile {
     scheduling_url?: string;
 }
 
+interface ProjectMedia {
+    id: number;
+    url: string;
+    media_type: 'image' | 'video';
+    sort_order: number;
+}
+
 interface Project {
     id: number;
     name: string;
@@ -47,6 +54,7 @@ interface Project {
     start_date?: string;
     end_date?: string;
     status: string;
+    media?: ProjectMedia[];
 }
 
 interface Experience {
@@ -220,6 +228,75 @@ const availabilityLabels: Record<string, { label: string; dot: string }> = {
     not_available:         { label: 'Not Available',            dot: 'bg-gray-400' },
 };
 
+function ProjectCard({ project, t, formatDate }: { project: Project; t: typeof themes['default']; formatDate: (d?: string) => string }) {
+    const media = project.media ?? [];
+    const [mediaIdx, setMediaIdx] = useState(0);
+    const current = media[mediaIdx];
+
+    return (
+        <div className={`rounded-xl overflow-hidden transition-all ${t.projCard}`}>
+            {current && (
+                <div className="relative w-full aspect-video bg-black/10">
+                    {current.media_type === 'image' ? (
+                        <img src={current.url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                        <video src={current.url} className="w-full h-full object-cover" controls muted />
+                    )}
+                    {media.length > 1 && (
+                        <>
+                            <button
+                                type="button"
+                                title="Previous"
+                                onClick={() => setMediaIdx((i) => (i - 1 + media.length) % media.length)}
+                                className="absolute left-1 top-1/2 -translate-y-1/2 w-6 h-6 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white text-xs transition-colors"
+                            >‹</button>
+                            <button
+                                type="button"
+                                title="Next"
+                                onClick={() => setMediaIdx((i) => (i + 1) % media.length)}
+                                className="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white text-xs transition-colors"
+                            >›</button>
+                            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1">
+                                {media.map((_, i) => (
+                                    <button
+                                        key={i}
+                                        type="button"
+                                        title={`Image ${i + 1}`}
+                                        onClick={() => setMediaIdx(i)}
+                                        className={`w-1.5 h-1.5 rounded-full transition-colors ${i === mediaIdx ? 'bg-white' : 'bg-white/40'}`}
+                                    />
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
+            )}
+            <div className="p-4">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                    <h3 className={`font-semibold text-sm ${t.projName}`}>{project.name}</h3>
+                    <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${t.statusMap[project.status] ?? 'bg-gray-100 text-gray-600'}`}>
+                        {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+                    </span>
+                </div>
+                {project.description && (
+                    <p className={`text-xs line-clamp-2 mb-2 ${t.subText}`}>{project.description}</p>
+                )}
+                {(project.start_date || project.end_date) && (
+                    <p className={`text-xs mb-2 ${t.expDate}`}>
+                        {formatDate(project.start_date)}{project.end_date && ` → ${formatDate(project.end_date)}`}
+                    </p>
+                )}
+                {project.project_url && (
+                    <a href={project.project_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-blue-400 hover:underline font-medium">
+                        <FontAwesomeIcon icon={faExternalLink} className="w-3 h-3" />
+                        View Project
+                    </a>
+                )}
+            </div>
+        </div>
+    );
+}
+
 function StarDisplay({ rating }: { rating: number }) {
     return (
         <div className="flex gap-0.5">
@@ -243,6 +320,7 @@ export default function PublicProfile({
     certifications,
     testimonials,
     services,
+    team,
 }: {
     profile: Profile;
     projects: Project[];
@@ -251,6 +329,7 @@ export default function PublicProfile({
     certifications: Certification[];
     testimonials: Testimonial[];
     services: Service[];
+    team?: { name: string; slug: string; logo_url?: string } | null;
 }) {
     const t = themes[profile.template ?? 'default'] ?? themes.default;
     const skills = profile.skills ? profile.skills.split(',').map((s) => s.trim()).filter(Boolean) : [];
@@ -358,6 +437,25 @@ export default function PublicProfile({
                             </div>
 
                             {profile.job_title && <p className={`mt-1 ${t.title}`}>{profile.job_title}</p>}
+
+                            {/* Team affiliation badge */}
+                            {team && (
+                                <a
+                                    href={`/t/${team.slug}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1.5 mt-2 text-xs px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 transition-colors"
+                                >
+                                    {team.logo_url ? (
+                                        <img src={team.logo_url} alt={team.name} className="w-4 h-4 rounded object-cover" />
+                                    ) : (
+                                        <span className="w-4 h-4 rounded bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-[8px]">
+                                            {team.name.charAt(0).toUpperCase()}
+                                        </span>
+                                    )}
+                                    <span className={t.subText}>{team.name}</span>
+                                </a>
+                            )}
 
                             {profile.location && (
                                 <p className={`text-sm mt-1 flex items-center gap-1.5 ${t.location}`}>
@@ -550,28 +648,7 @@ export default function PublicProfile({
                             <h2 className={`text-lg font-semibold mb-5 ${t.sectionTitle}`}>Projects</h2>
                             <div className="grid gap-4 sm:grid-cols-2">
                                 {projects.map((project) => (
-                                    <div key={project.id} className={`rounded-xl p-4 transition-all ${t.projCard}`}>
-                                        <div className="flex items-start justify-between gap-2 mb-2">
-                                            <h3 className={`font-semibold text-sm ${t.projName}`}>{project.name}</h3>
-                                            <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${t.statusMap[project.status] ?? 'bg-gray-100 text-gray-600'}`}>
-                                                {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
-                                            </span>
-                                        </div>
-                                        {project.description && (
-                                            <p className={`text-xs line-clamp-2 mb-2 ${t.subText}`}>{project.description}</p>
-                                        )}
-                                        {(project.start_date || project.end_date) && (
-                                            <p className={`text-xs mb-2 ${t.expDate}`}>
-                                                {formatDate(project.start_date)}{project.end_date && ` → ${formatDate(project.end_date)}`}
-                                            </p>
-                                        )}
-                                        {project.project_url && (
-                                            <a href={project.project_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-blue-400 hover:underline font-medium">
-                                                <FontAwesomeIcon icon={faExternalLink} className="w-3 h-3" />
-                                                View Project
-                                            </a>
-                                        )}
-                                    </div>
+                                    <ProjectCard key={project.id} project={project} t={t} formatDate={formatDate} />
                                 ))}
                             </div>
                         </div>
