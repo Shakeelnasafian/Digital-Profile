@@ -13,6 +13,9 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ProjectMediaController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TeamController;
+use App\Http\Controllers\SaveCustomDomainController;
+use App\Http\Controllers\VerifyCustomDomainController;
+use App\Http\Controllers\RemoveCustomDomainController;
 
 // Welcome page
 Route::get('/', fn() => Inertia::render('welcome'))->name('home');
@@ -82,6 +85,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // PDF Export
     Route::get('profile/{profile}/export-pdf', [ProfileController::class, 'exportPdf'])->name('profile.export-pdf');
+
+    // Custom Domain
+    Route::post('profile/{profile}/custom-domain', SaveCustomDomainController::class)->name('profile.custom-domain.save');
+    Route::post('profile/{profile}/verify-domain', VerifyCustomDomainController::class)->name('profile.custom-domain.verify');
+    Route::delete('profile/{profile}/custom-domain', RemoveCustomDomainController::class)->name('profile.custom-domain.remove');
 
     // Notifications
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');

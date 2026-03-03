@@ -65,10 +65,9 @@ Standalone iframe-ready page at `GET /embed/{slug}` — minimal card (avatar, na
 
 ---
 
-### P5-T4 — Custom Domains `[ ]`
+### P5-T4 — Custom Domains `[x]`
 
-- **Status:** Planned, not yet implemented
-- DNS TXT record verification, `custom_domain` + `domain_verified_at` columns on profiles, `CustomDomainMiddleware` to resolve Host header to profile. Requires production server with wildcard DNS.
+DNS TXT record verification. `custom_domain`, `domain_verification_token`, `domain_verified_at` columns on profiles. `CustomDomainMiddleware` resolves Host header to a verified profile and renders the public profile page. Three invokable controllers (Save, Verify, Remove) with dedicated Actions. Custom Domain card in profile edit page shows DNS setup instructions, copy-token button, verify flow, and verified/unverified state. Requires production server with wildcard DNS to function end-to-end.
 
 ---
 

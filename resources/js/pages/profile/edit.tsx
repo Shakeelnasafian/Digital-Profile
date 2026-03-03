@@ -1,11 +1,11 @@
 import React, { useCallback, useState } from 'react';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { LoaderCircle, CheckCircle2, XCircle, AlertTriangle, Calendar } from 'lucide-react';
+import { LoaderCircle, CheckCircle2, XCircle, AlertTriangle, Calendar, Globe, Copy, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { type BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -38,6 +38,9 @@ interface Profile {
     template?: string;
     availability_status?: string;
     scheduling_url?: string;
+    custom_domain?: string | null;
+    domain_verification_token?: string | null;
+    domain_verified_at?: string | null;
 }
 
 const templates = [
@@ -135,6 +138,38 @@ export default function Edit({ profile }: { profile: Profile }) {
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
         post(route('profile.update', profile.id), { forceFormData: true });
+    };
+
+    const [domainInput, setDomainInput] = useState('');
+    const [domainProcessing, setDomainProcessing] = useState(false);
+    const [copied, setCopied] = useState(false);
+
+    const saveDomain = (e: React.FormEvent) => {
+        e.preventDefault();
+        setDomainProcessing(true);
+        router.post(route('profile.custom-domain.save', profile.id), { custom_domain: domainInput }, {
+            onFinish: () => setDomainProcessing(false),
+            onSuccess: () => setDomainInput(''),
+        });
+    };
+
+    const verifyDomain = () => {
+        setDomainProcessing(true);
+        router.post(route('profile.custom-domain.verify', profile.id), {}, {
+            onFinish: () => setDomainProcessing(false),
+        });
+    };
+
+    const removeDomain = () => {
+        router.delete(route('profile.custom-domain.remove', profile.id));
+    };
+
+    const copyToken = () => {
+        if (profile.domain_verification_token) {
+            navigator.clipboard.writeText(profile.domain_verification_token);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        }
     };
 
     return (
@@ -483,6 +518,105 @@ export default function Edit({ profile }: { profile: Profile }) {
                 </Button>
 
             </form>
+
+            {/* ── Custom Domain ── */}
+            <div className="m-5 p-6 space-y-5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl">
+                <div className="flex items-start gap-3">
+                    <Globe className="w-5 h-5 text-gray-500 mt-0.5 shrink-0" />
+                    <div>
+                        <h3 className="text-base font-semibold text-gray-900 dark:text-white">Custom Domain</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                            Point your own domain to your public profile (e.g. <span className="font-mono">yourdomain.com</span>).
+                        </p>
+                    </div>
+                </div>
+
+                {/* State: no domain saved yet */}
+                {!profile.custom_domain && (
+                    <form onSubmit={saveDomain} className="flex gap-2">
+                        <input
+                            type="text"
+                            value={domainInput}
+                            onChange={(e) => setDomainInput(e.target.value)}
+                            placeholder="yourdomain.com"
+                            className="flex-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <Button type="submit" disabled={domainProcessing || !domainInput.trim()}>
+                            {domainProcessing && <LoaderCircle className="h-4 w-4 animate-spin mr-1.5" />}
+                            Save Domain
+                        </Button>
+                    </form>
+                )}
+
+                {/* State: domain saved, awaiting verification */}
+                {profile.custom_domain && !profile.domain_verified_at && (
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                            <ShieldAlert className="w-4 h-4 text-yellow-500 shrink-0" />
+                            <span className="text-sm font-medium text-yellow-700 dark:text-yellow-400">
+                                Pending verification — <span className="font-mono">{profile.custom_domain}</span>
+                            </span>
+                        </div>
+
+                        <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3 text-sm">
+                            <p className="font-medium text-gray-800 dark:text-gray-200">Add this DNS TXT record to your domain:</p>
+                            <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 font-mono text-xs text-gray-700 dark:text-gray-300">
+                                <span className="text-gray-400 uppercase tracking-wide">Name</span>
+                                <span className="break-all">_digital-profile.{profile.custom_domain}</span>
+                                <span className="text-gray-400 uppercase tracking-wide">Type</span>
+                                <span>TXT</span>
+                                <span className="text-gray-400 uppercase tracking-wide">Value</span>
+                                <div className="flex items-center gap-2 break-all">
+                                    <span>{profile.domain_verification_token}</span>
+                                    <button
+                                        type="button"
+                                        onClick={copyToken}
+                                        className="shrink-0 text-blue-500 hover:text-blue-600"
+                                        title="Copy token"
+                                    >
+                                        {copied ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                                    </button>
+                                </div>
+                            </div>
+                            <p className="text-xs text-gray-400">DNS changes can take up to 48 hours to propagate.</p>
+                        </div>
+
+                        <div className="flex gap-2">
+                            <Button type="button" onClick={verifyDomain} disabled={domainProcessing}>
+                                {domainProcessing && <LoaderCircle className="h-4 w-4 animate-spin mr-1.5" />}
+                                Verify Domain
+                            </Button>
+                            <Button type="button" variant="outline" onClick={removeDomain}>
+                                Remove
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
+                {/* State: verified */}
+                {profile.custom_domain && profile.domain_verified_at && (
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                            <ShieldCheck className="w-4 h-4 text-green-500 shrink-0" />
+                            <span className="text-sm font-medium text-green-700 dark:text-green-400">
+                                Verified — your profile is live at{' '}
+                                <a
+                                    href={`https://${profile.custom_domain}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline font-mono"
+                                >
+                                    {profile.custom_domain}
+                                </a>
+                            </span>
+                        </div>
+                        <Button type="button" variant="outline" size="sm" onClick={removeDomain}>
+                            <XCircle className="w-3.5 h-3.5 mr-1.5" />
+                            Remove Custom Domain
+                        </Button>
+                    </div>
+                )}
+            </div>
         </AppLayout>
     );
 }

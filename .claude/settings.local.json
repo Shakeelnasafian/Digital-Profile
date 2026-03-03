@@ -4,7 +4,11 @@
       "Bash(grep -r \"Route::\" /c/xampp/htdocs/Digital-Profile/routes/*.php)",
       "Bash(php artisan tinker --execute='print_r\\(DB::select\\(\"\"PRAGMA table_info\\(projects\\)\"\"\\)\\)')",
       "Bash(php artisan tinker --execute=\"use Inertia\\\\Inertia; echo get_class\\(new Inertia\\);\")",
-      "Bash(php artisan route:list)"
+      "Bash(php artisan route:list)",
+      "Bash(for f in app/Http/Middleware/CustomDomainMiddleware.php app/Actions/InitiateCustomDomainAction.php app/Actions/VerifyCustomDomainAction.php app/Actions/RemoveCustomDomainAction.php app/Http/Controllers/SaveCustomDomainController.php app/Http/Controllers/VerifyCustomDomainController.php app/Http/Controllers/RemoveCustomDomainController.php app/Http/Requests/SaveCustomDomainRequest.php)",
+      "Bash(do php -l \"$f\")",
+      "Bash(done)",
+      "Bash(php artisan about)"
     ]
   }
 }
