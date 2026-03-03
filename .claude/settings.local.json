@@ -8,7 +8,8 @@
       "Bash(for f in app/Http/Middleware/CustomDomainMiddleware.php app/Actions/InitiateCustomDomainAction.php app/Actions/VerifyCustomDomainAction.php app/Actions/RemoveCustomDomainAction.php app/Http/Controllers/SaveCustomDomainController.php app/Http/Controllers/VerifyCustomDomainController.php app/Http/Controllers/RemoveCustomDomainController.php app/Http/Requests/SaveCustomDomainRequest.php)",
       "Bash(do php -l \"$f\")",
       "Bash(done)",
-      "Bash(php artisan about)"
+      "Bash(php artisan about)",
+      "Bash(for f in app/Http/Requests/GenerateBioRequest.php app/Actions/GenerateBioAction.php app/Http/Controllers/GenerateBioController.php config/services.php routes/web.php)"
     ]
   }
 }
