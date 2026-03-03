@@ -39,6 +39,13 @@ class Profile extends Model
         'medium',
         'availability_status',
         'scheduling_url',
+        'custom_domain',
+        'domain_verification_token',
+        'domain_verified_at',
+    ];
+
+    protected $casts = [
+        'domain_verified_at' => 'datetime',
     ];
 
     protected static function booted()

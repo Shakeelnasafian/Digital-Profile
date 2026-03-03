@@ -35,8 +35,11 @@ class ProfileResource extends JsonResource
             'profile_views'       => $this->profile_views,
             'profile_image'       => $this->profile_image,
             'qr_code_url'         => $this->qr_code_url,
-            'availability_status' => $this->availability_status,
-            'scheduling_url'      => $this->scheduling_url,
+            'availability_status'       => $this->availability_status,
+            'scheduling_url'            => $this->scheduling_url,
+            'custom_domain'             => $this->custom_domain,
+            'domain_verification_token' => $this->domain_verification_token,
+            'domain_verified_at'        => $this->domain_verified_at?->toISOString(),
         ];
     }
 }
