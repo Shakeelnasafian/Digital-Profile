@@ -1,10 +1,15 @@
-<?php 
+<?php
+
+declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Models\Profile;
+use Illuminate\Support\Facades\Storage;
+
 class DeleteProfileAction
 {
-    public function handle($profile): void
+    public function handle(Profile $profile): void
     {
         // Delete the profile image if it exists
         if ($profile->profile_image) {

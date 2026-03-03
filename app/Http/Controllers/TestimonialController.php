@@ -1,17 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
+use Inertia\Response;
 use App\Models\Profile;
 use App\Models\Testimonial;
+use App\Actions\ApproveTestimonialAction;
 use App\Actions\SubmitTestimonialAction;
 use App\Http\Requests\TestimonialRequest;
 use App\Http\Resources\TestimonialResource;
 
 class TestimonialController extends Controller
 {
-    public function create(string $slug)
+    public function create(string $slug): Response
     {
         $profile = Profile::where('slug', $slug)
             ->where('is_public', true)
@@ -23,7 +28,7 @@ class TestimonialController extends Controller
         ]);
     }
 
-    public function store(TestimonialRequest $request, string $slug, SubmitTestimonialAction $action)
+    public function store(TestimonialRequest $request, string $slug, SubmitTestimonialAction $action): RedirectResponse
     {
         $profile = Profile::where('slug', $slug)
             ->where('is_public', true)
@@ -34,7 +39,7 @@ class TestimonialController extends Controller
         return redirect()->back()->with('success', 'Thank you! Your testimonial is pending review.');
     }
 
-    public function index()
+    public function index(): Response
     {
         $profile = Profile::where('user_id', auth()->id())->firstOrFail();
 
@@ -47,17 +52,17 @@ class TestimonialController extends Controller
         ]);
     }
 
-    public function approve(Testimonial $testimonial)
+    public function approve(Testimonial $testimonial, ApproveTestimonialAction $action): RedirectResponse
     {
         $profile = Profile::where('user_id', auth()->id())->firstOrFail();
         abort_if($testimonial->profile_id !== $profile->id, 403);
 
-        $testimonial->update(['is_approved' => true]);
+        $action($testimonial);
 
         return redirect()->back()->with('success', 'Testimonial approved.');
     }
 
-    public function destroy(Testimonial $testimonial)
+    public function destroy(Testimonial $testimonial): RedirectResponse
     {
         $profile = Profile::where('user_id', auth()->id())->firstOrFail();
         abort_if($testimonial->profile_id !== $profile->id, 403);

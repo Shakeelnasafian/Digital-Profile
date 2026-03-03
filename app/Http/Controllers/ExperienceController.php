@@ -1,67 +1,55 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
+use Inertia\Response;
 use App\Models\Experience;
-use Illuminate\Http\Request;
+use App\Actions\CreateExperienceAction;
+use App\Actions\DeleteExperienceAction;
+use App\Actions\UpdateExperienceAction;
+use App\Http\Requests\StoreExperienceRequest;
+use App\Http\Requests\UpdateExperienceRequest;
+use App\Http\Resources\ExperienceResource;
 
 class ExperienceController extends Controller
 {
-    public function index()
+    public function index(): Response
     {
         $experiences = Experience::where('user_id', auth()->id())
             ->orderBy('start_date', 'desc')
             ->get();
 
         return Inertia::render('experience/index', [
-            'experiences' => $experiences,
+            'experiences' => ExperienceResource::collection($experiences),
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreExperienceRequest $request, CreateExperienceAction $action): RedirectResponse
     {
-        $data = $request->validate([
-            'company'     => 'required|string|max:255',
-            'position'    => 'required|string|max:255',
-            'location'    => 'nullable|string|max:255',
-            'start_date'  => 'required|date',
-            'end_date'    => 'nullable|date|after_or_equal:start_date',
-            'is_current'  => 'boolean',
-            'description' => 'nullable|string|max:2000',
-        ]);
+        $action($request->validated(), auth()->id());
 
-        $data['user_id'] = auth()->id();
-
-        Experience::create($data);
-
-        return redirect()->route('experience.index')->with('success', 'Experience added successfully.');
+        return to_route('experience.index')->with('success', 'Experience added successfully.');
     }
 
-    public function update(Request $request, string $id)
+    public function update(UpdateExperienceRequest $request, Experience $experience, UpdateExperienceAction $action): RedirectResponse
     {
-        $experience = Experience::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        abort_if($experience->user_id !== auth()->id(), 403);
 
-        $data = $request->validate([
-            'company'     => 'required|string|max:255',
-            'position'    => 'required|string|max:255',
-            'location'    => 'nullable|string|max:255',
-            'start_date'  => 'required|date',
-            'end_date'    => 'nullable|date|after_or_equal:start_date',
-            'is_current'  => 'boolean',
-            'description' => 'nullable|string|max:2000',
-        ]);
+        $action($experience, $request->validated());
 
-        $experience->update($data);
-
-        return redirect()->route('experience.index')->with('success', 'Experience updated successfully.');
+        return to_route('experience.index')->with('success', 'Experience updated successfully.');
     }
 
-    public function destroy(string $id)
+    public function destroy(Experience $experience, DeleteExperienceAction $action): RedirectResponse
     {
-        $experience = Experience::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
-        $experience->delete();
+        abort_if($experience->user_id !== auth()->id(), 403);
 
-        return redirect()->route('experience.index')->with('success', 'Experience deleted successfully.');
+        $action($experience);
+
+        return to_route('experience.index')->with('success', 'Experience deleted successfully.');
     }
 }
