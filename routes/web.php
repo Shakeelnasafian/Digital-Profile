@@ -16,6 +16,7 @@ use App\Http\Controllers\TeamController;
 use App\Http\Controllers\SaveCustomDomainController;
 use App\Http\Controllers\VerifyCustomDomainController;
 use App\Http\Controllers\RemoveCustomDomainController;
+use App\Http\Controllers\GenerateBioController;
 
 // Welcome page
 Route::get('/', fn() => Inertia::render('welcome'))->name('home');
@@ -90,6 +91,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('profile/{profile}/custom-domain', SaveCustomDomainController::class)->name('profile.custom-domain.save');
     Route::post('profile/{profile}/verify-domain', VerifyCustomDomainController::class)->name('profile.custom-domain.verify');
     Route::delete('profile/{profile}/custom-domain', RemoveCustomDomainController::class)->name('profile.custom-domain.remove');
+
+    // AI Bio Generator
+    Route::post('profile/{profile}/generate-bio', GenerateBioController::class)->middleware('throttle:5,1')->name('profile.generate-bio');
 
     // Notifications
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');

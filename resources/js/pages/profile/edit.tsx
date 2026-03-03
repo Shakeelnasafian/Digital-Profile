@@ -1,11 +1,12 @@
 import React, { useCallback, useState } from 'react';
+import axios from 'axios';
 import { Head, useForm, router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { LoaderCircle, CheckCircle2, XCircle, AlertTriangle, Calendar, Globe, Copy, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { LoaderCircle, CheckCircle2, XCircle, AlertTriangle, Calendar, Globe, Copy, ShieldCheck, ShieldAlert, Sparkles } from 'lucide-react';
 import { type BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -143,6 +144,30 @@ export default function Edit({ profile }: { profile: Profile }) {
     const [domainInput, setDomainInput] = useState('');
     const [domainProcessing, setDomainProcessing] = useState(false);
     const [copied, setCopied] = useState(false);
+
+    const [bioGeneratorOpen, setBioGeneratorOpen] = useState(false);
+    const [bioContext, setBioContext] = useState('');
+    const [bioGenerating, setBioGenerating] = useState(false);
+    const [bioError, setBioError] = useState<string | null>(null);
+
+    const generateBio = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setBioGenerating(true);
+        setBioError(null);
+        try {
+            const res = await axios.post(route('profile.generate-bio', profile.id), { context: bioContext });
+            setData('short_bio', res.data.bio);
+            setBioGeneratorOpen(false);
+            setBioContext('');
+        } catch (err: any) {
+            const msg = err?.response?.data?.errors?.context?.[0]
+                ?? err?.response?.data?.message
+                ?? 'Failed to generate bio. Please try again.';
+            setBioError(msg);
+        } finally {
+            setBioGenerating(false);
+        }
+    };
 
     const saveDomain = (e: React.FormEvent) => {
         e.preventDefault();
@@ -306,7 +331,17 @@ export default function Edit({ profile }: { profile: Profile }) {
                     </div>
 
                     <div>
-                        <Label htmlFor="short_bio">Short Bio</Label>
+                        <div className="flex items-center justify-between mb-1">
+                            <Label htmlFor="short_bio">Short Bio</Label>
+                            <button
+                                type="button"
+                                onClick={() => { setBioGeneratorOpen(v => !v); setBioError(null); }}
+                                className="inline-flex items-center gap-1.5 text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 transition-colors"
+                            >
+                                <Sparkles className="w-3.5 h-3.5" />
+                                Generate with AI
+                            </button>
+                        </div>
                         <Textarea
                             id="short_bio"
                             value={data.short_bio}
@@ -315,6 +350,46 @@ export default function Edit({ profile }: { profile: Profile }) {
                             rows={3}
                         />
                         {errors.short_bio && <p className="text-xs text-red-500 mt-1">{errors.short_bio}</p>}
+
+                        {bioGeneratorOpen && (
+                            <form onSubmit={generateBio} className="mt-3 p-4 bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800 rounded-xl space-y-3">
+                                <p className="text-xs font-medium text-violet-700 dark:text-violet-300">
+                                    Describe yourself in a few words — your experience, what you do, your strengths — and AI will write your bio.
+                                </p>
+                                <Textarea
+                                    value={bioContext}
+                                    onChange={(e) => setBioContext(e.target.value)}
+                                    placeholder="e.g. Full-stack developer with 5 years experience in fintech, love building clean UIs, Laravel & React expert..."
+                                    rows={3}
+                                    maxLength={500}
+                                    className="bg-white dark:bg-gray-900"
+                                />
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs text-gray-400">{bioContext.length}/500</span>
+                                    <div className="flex gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => { setBioGeneratorOpen(false); setBioContext(''); setBioError(null); }}
+                                            className="text-xs px-3 py-1.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={bioGenerating || bioContext.trim().length < 10}
+                                            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            {bioGenerating ? (
+                                                <><LoaderCircle className="w-3.5 h-3.5 animate-spin" /> Generating…</>
+                                            ) : (
+                                                <><Sparkles className="w-3.5 h-3.5" /> Generate Bio</>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                                {bioError && <p className="text-xs text-red-500">{bioError}</p>}
+                            </form>
+                        )}
                     </div>
 
                     <div>
