@@ -1,57 +1,50 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
-use App\Models\Team;
-use App\Models\User;
+use Inertia\Response;
 use App\Models\Profile;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use App\Models\Team;
+use App\Actions\AddTeamMemberAction;
+use App\Actions\CreateTeamAction;
+use App\Actions\DeleteTeamAction;
+use App\Actions\RemoveTeamMemberAction;
+use App\Http\Requests\AddTeamMemberRequest;
+use App\Http\Requests\StoreTeamRequest;
 
 class TeamController extends Controller
 {
-    public function create()
+    public function create(): Response
     {
         return Inertia::render('team/create');
     }
 
-    public function store(Request $request)
+    public function store(StoreTeamRequest $request, CreateTeamAction $action): RedirectResponse
     {
-        $data = $request->validate([
-            'name'        => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'website'     => 'nullable|url|max:255',
-            'logo'        => 'nullable|image|max:2048',
-        ]);
+        $team = $action($request->safe()->except('logo'), auth()->id(), $request->file('logo'));
 
-        $data['owner_user_id'] = auth()->id();
-
-        if ($request->hasFile('logo')) {
-            $data['logo'] = $request->file('logo')->store('teams', 'public');
-        }
-
-        $team = Team::create($data);
-
-        // Owner is also a member
-        $team->members()->attach(auth()->id(), ['role' => 'owner']);
-
-        return redirect()->route('teams.manage', $team->slug)
+        return to_route('teams.manage', $team->slug)
             ->with('success', 'Team created successfully.');
     }
 
-    public function manage(string $slug)
+    public function manage(string $slug): Response
     {
         $team = Team::where('slug', $slug)
             ->where('owner_user_id', auth()->id())
             ->firstOrFail();
 
         $members = $team->members()->get()->map(fn($u) => [
-            'id'       => $u->id,
-            'name'     => $u->name,
-            'email'    => $u->email,
-            'role'     => $u->pivot->role,
-            'profile'  => Profile::where('user_id', $u->id)->select('slug', 'display_name', 'job_title', 'profile_image')->first(),
+            'id'      => $u->id,
+            'name'    => $u->name,
+            'email'   => $u->email,
+            'role'    => $u->pivot->role,
+            'profile' => Profile::where('user_id', $u->id)
+                ->select('slug', 'display_name', 'job_title', 'profile_image')
+                ->first(),
         ]);
 
         return Inertia::render('team/manage', [
@@ -67,43 +60,29 @@ class TeamController extends Controller
         ]);
     }
 
-    public function addMember(Request $request, string $slug)
+    public function addMember(AddTeamMemberRequest $request, string $slug, AddTeamMemberAction $action): RedirectResponse
     {
         $team = Team::where('slug', $slug)
             ->where('owner_user_id', auth()->id())
             ->firstOrFail();
 
-        $request->validate(['email' => 'required|email']);
-
-        $user = User::where('email', $request->email)->first();
-
-        if (! $user) {
-            return redirect()->back()->withErrors(['email' => 'No account found with that email address.']);
-        }
-
-        if ($team->members()->where('user_id', $user->id)->exists()) {
-            return redirect()->back()->withErrors(['email' => 'This user is already a member.']);
-        }
-
-        $team->members()->attach($user->id, ['role' => 'member']);
+        $user = $action($team, $request->validated('email'));
 
         return redirect()->back()->with('success', "{$user->name} added to the team.");
     }
 
-    public function removeMember(string $slug, int $userId)
+    public function removeMember(string $slug, int $userId, RemoveTeamMemberAction $action): RedirectResponse
     {
         $team = Team::where('slug', $slug)
             ->where('owner_user_id', auth()->id())
             ->firstOrFail();
 
-        abort_if($userId === auth()->id(), 422, 'You cannot remove yourself as the owner.');
-
-        $team->members()->detach($userId);
+        $action($team, $userId, auth()->id());
 
         return redirect()->back()->with('success', 'Member removed.');
     }
 
-    public function show(string $slug)
+    public function show(string $slug): Response
     {
         $team = Team::where('slug', $slug)->firstOrFail();
 
@@ -117,11 +96,11 @@ class TeamController extends Controller
                 'name'    => $user->name,
                 'role'    => $user->pivot->role,
                 'profile' => $profile ? [
-                    'slug'          => $profile->slug,
-                    'display_name'  => $profile->display_name,
-                    'job_title'     => $profile->job_title,
-                    'profile_image' => $profile->profile_image,
-                    'location'      => $profile->location,
+                    'slug'                => $profile->slug,
+                    'display_name'        => $profile->display_name,
+                    'job_title'           => $profile->job_title,
+                    'profile_image'       => $profile->profile_image,
+                    'location'            => $profile->location,
                     'availability_status' => $profile->availability_status,
                 ] : null,
             ];
@@ -139,7 +118,7 @@ class TeamController extends Controller
         ]);
     }
 
-    public function index()
+    public function index(): Response
     {
         $userId = auth()->id();
 
@@ -169,18 +148,14 @@ class TeamController extends Controller
         ]);
     }
 
-    public function destroy(string $slug)
+    public function destroy(string $slug, DeleteTeamAction $action): RedirectResponse
     {
         $team = Team::where('slug', $slug)
             ->where('owner_user_id', auth()->id())
             ->firstOrFail();
 
-        if ($team->logo) {
-            Storage::disk('public')->delete($team->logo);
-        }
+        $action($team);
 
-        $team->delete();
-
-        return redirect()->route('teams.index')->with('success', 'Team deleted.');
+        return to_route('teams.index')->with('success', 'Team deleted.');
     }
 }

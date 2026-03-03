@@ -1,39 +1,37 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
+use Inertia\Response;
+use App\Http\Resources\NotificationResource;
 
 class NotificationController extends Controller
 {
-    public function index()
+    public function index(): Response
     {
         $notifications = auth()->user()
             ->notifications()
             ->latest()
             ->limit(50)
-            ->get()
-            ->map(fn($n) => [
-                'id'         => $n->id,
-                'type'       => $n->data['type'] ?? 'unknown',
-                'data'       => $n->data,
-                'read_at'    => $n->read_at?->toISOString(),
-                'created_at' => $n->created_at->toISOString(),
-            ]);
+            ->get();
 
         return Inertia::render('notifications/index', [
-            'notifications' => $notifications,
+            'notifications' => NotificationResource::collection($notifications),
         ]);
     }
 
-    public function markRead(string $id)
+    public function markRead(string $id): RedirectResponse
     {
         auth()->user()->notifications()->where('id', $id)->first()?->markAsRead();
 
         return redirect()->back();
     }
 
-    public function markAllRead()
+    public function markAllRead(): RedirectResponse
     {
         auth()->user()->unreadNotifications()->update(['read_at' => now()]);
 
