@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { Head, Link, router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
@@ -6,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGithub, faLinkedin, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import { faEnvelope, faPhone, faGlobe, faLocationDot } from '@fortawesome/free-solid-svg-icons';
 import { Button } from '@/components/ui/button';
-import { Pencil, Eye, QrCode, Trash2, ExternalLink, ChevronDown, ChevronUp, Copy, Check, FileDown, Code2 } from 'lucide-react';
+import { Pencil, Eye, QrCode, Trash2, ExternalLink, ChevronDown, ChevronUp, Copy, Check, FileDown, Code2, Sparkles, LoaderCircle } from 'lucide-react';
 
 interface Profile {
     id: number;
@@ -125,6 +126,48 @@ export default function Show({
     const [sigCopied, setSigCopied] = useState(false);
     const [embedOpen, setEmbedOpen] = useState(false);
     const [embedCopied, setEmbedCopied] = useState(false);
+
+    const [bioGenOpen, setBioGenOpen] = useState(false);
+    const [bioContext, setBioContext] = useState('');
+    const [bioGenerating, setBioGenerating] = useState(false);
+    const [generatedBio, setGeneratedBio] = useState<string | null>(null);
+    const [bioApplying, setBioApplying] = useState(false);
+    const [bioError, setBioError] = useState<string | null>(null);
+
+    const generateBio = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setBioGenerating(true);
+        setBioError(null);
+        setGeneratedBio(null);
+        try {
+            const res = await axios.post(route('profile.generate-bio', profile.id), { context: bioContext });
+            setGeneratedBio(res.data.bio);
+        } catch (err: any) {
+            const msg = err?.response?.data?.errors?.context?.[0]
+                ?? err?.response?.data?.message
+                ?? 'Failed to generate bio. Please try again.';
+            setBioError(msg);
+        } finally {
+            setBioGenerating(false);
+        }
+    };
+
+    const applyBio = () => {
+        if (!generatedBio) return;
+        setBioApplying(true);
+        router.patch(route('profile.update', profile.id), {
+            display_name: profile.display_name,
+            email: profile.email ?? '',
+            short_bio: generatedBio,
+        } as any, {
+            onSuccess: () => {
+                setBioGenOpen(false);
+                setBioContext('');
+                setGeneratedBio(null);
+            },
+            onFinish: () => setBioApplying(false),
+        });
+    };
 
     const signatureHtml = sigOpen ? buildSignatureHtml(profile) : '';
 
@@ -454,6 +497,93 @@ export default function Show({
                                     <><Copy className="w-4 h-4" />Copy Embed Code</>
                                 )}
                             </Button>
+                        </div>
+                    )}
+                </div>
+
+                {/* AI Bio Generator */}
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
+                    <button
+                        type="button"
+                        onClick={() => { setBioGenOpen((o) => !o); setBioError(null); setGeneratedBio(null); }}
+                        className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                    >
+                        <div>
+                            <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                <Sparkles className="w-4 h-4 text-violet-500" />
+                                AI Bio Generator
+                            </h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                Generate a professional bio using AI and apply it to your profile
+                            </p>
+                        </div>
+                        {bioGenOpen ? (
+                            <ChevronUp className="w-5 h-5 text-gray-400 shrink-0" />
+                        ) : (
+                            <ChevronDown className="w-5 h-5 text-gray-400 shrink-0" />
+                        )}
+                    </button>
+
+                    {bioGenOpen && (
+                        <div className="border-t border-gray-100 dark:border-gray-800 p-5 space-y-4">
+                            <form onSubmit={generateBio} className="space-y-3">
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    Describe yourself — your experience, strengths, what you do — and AI will write a polished 2–3 sentence bio.
+                                </p>
+                                <textarea
+                                    value={bioContext}
+                                    onChange={(e) => setBioContext(e.target.value)}
+                                    placeholder="e.g. Full-stack developer with 5 years in fintech, love clean UIs, expert in Laravel & React..."
+                                    rows={3}
+                                    maxLength={500}
+                                    className="w-full text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                                />
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs text-gray-400">{bioContext.length}/500</span>
+                                    <button
+                                        type="submit"
+                                        disabled={bioGenerating || bioContext.trim().length < 10}
+                                        className="inline-flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        {bioGenerating ? (
+                                            <><LoaderCircle className="w-4 h-4 animate-spin" /> Generating…</>
+                                        ) : (
+                                            <><Sparkles className="w-4 h-4" /> Generate Bio</>
+                                        )}
+                                    </button>
+                                </div>
+                                {bioError && <p className="text-xs text-red-500">{bioError}</p>}
+                            </form>
+
+                            {generatedBio && (
+                                <div className="space-y-3">
+                                    <div className="p-4 bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800 rounded-xl">
+                                        <p className="text-xs font-medium text-violet-600 dark:text-violet-400 mb-2 uppercase tracking-wide">Generated Bio</p>
+                                        <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">{generatedBio}</p>
+                                    </div>
+                                    <div className="flex gap-2 justify-end">
+                                        <button
+                                            type="button"
+                                            onClick={() => setGeneratedBio(null)}
+                                            className="text-sm px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                        >
+                                            Discard
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={applyBio}
+                                            disabled={bioApplying}
+                                            className="inline-flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            {bioApplying ? (
+                                                <><LoaderCircle className="w-4 h-4 animate-spin" /> Applying…</>
+                                            ) : (
+                                                <><Check className="w-4 h-4" /> Apply to Profile</>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
