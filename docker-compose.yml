@@ -1,107 +1,54 @@
 services:
-
-  # ---- Web Server ----
-  nginx:
+  dp-nginx:
     image: nginx:alpine
     ports:
       - "8080:80"
     volumes:
       - .:/var/www/html
-      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
-      - php
+      dp-php:
+        condition: service_healthy
     networks:
-      - app-network
+      - shared-network
 
-  # ---- PHP Application ----
-  php:
-    build:
-      context: .
-      dockerfile: docker/php/Dockerfile
-    volumes:
-      - .:/var/www/html
-    depends_on:
-      - mysql
-      - redis
-    networks:
-      - app-network
+  dp-php:
+      build:
+        context: .
+        dockerfile: docker/php/Dockerfile
+      volumes:
+        - .:/var/www/html
+      networks:
+        shared-network:
+          aliases:
+            - dp-php
+      healthcheck:
+        test: ["CMD", "php-fpm", "-t"]
+        interval: 10s
+        timeout: 5s
+        retries: 3
+        start_period: 30s
 
-  # ---- Database ----
-  mysql:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: shakeel1234
-      MYSQL_DATABASE: digital_profile
-      MYSQL_USER: myuser
-      MYSQL_PASSWORD: shakeel123
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - app-network
-
-  # ---- Cache & Queues ----
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-    networks:
-      - app-network
-
-  # ---- Queue Worker (Horizon) ----
-  horizon:
+  dp-horizon:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
     command: php artisan queue:listen --tries=3
     volumes:
       - .:/var/www/html
-    depends_on:
-      - mysql
-      - redis
     networks:
-      - app-network
+      - shared-network
 
-  # ---- Scheduler (Cron) ----
-  scheduler:
+  dp-scheduler:
     build:
       context: .
       dockerfile: docker/scheduler/Dockerfile
     volumes:
       - .:/var/www/html
-    depends_on:
-      - mysql
-      - redis
     networks:
-      - app-network
-
-  # ---- Email Testing ----
-  mailpit:
-    image: axllent/mailpit
-    ports:
-      - "8025:8025"   # Web UI
-      - "1025:1025"   # SMTP
-    networks:
-      - app-network
-
-  # ---- Database GUI ----
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    ports:
-      - "8081:80"
-    environment:
-      PMA_HOST: mysql
-      PMA_USER: myuser
-      PMA_PASSWORD: shakeel123
-    depends_on:
-      - mysql
-    networks:
-      - app-network
+      - shared-network
 
 networks:
-  app-network:
-    driver: bridge
-
-volumes:
-  mysql_data:
+  shared-network:
+    external: true
+    name: shared-network
