@@ -1,0 +1,55 @@
+services:
+  dp-nginx:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      dp-php:
+        condition: service_healthy
+    networks:
+      - shared-network
+
+# ---- PHP Application ----
+  dp-php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: digital-profile-dp-php:latest    # 👈 name the built image
+    volumes:
+      - .:/var/www/html
+    networks:
+      shared-network:
+        aliases:
+          - dp-php
+    healthcheck:
+      test: ["CMD", "php-fpm", "-t"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # ---- Queue Worker ----
+  dp-horizon:
+    image: digital-profile-dp-php:latest    # 👈 reuse same image
+    command: php artisan queue:listen --tries=3
+    volumes:
+      - .:/var/www/html
+    networks:
+      - shared-network
+
+  # ---- Scheduler ----
+  dp-scheduler:
+    image: digital-profile-dp-php:latest
+    command: sh -c "while true; do php artisan schedule:run; sleep 60; done"
+    volumes:
+      - .:/var/www/html
+    networks:
+      - shared-network
+
+networks:
+  shared-network:
+    external: true
+    name: shared-network
