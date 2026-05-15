@@ -20,9 +20,9 @@ class NewLeadNotification extends Notification
     public function toDatabase(object $notifiable): array
     {
         return [
-            'type'         => 'new_lead',
+            'type' => 'new_lead',
             'visitor_name' => $this->lead->visitor_name,
-            'message'      => \Illuminate\Support\Str::limit($this->lead->message ?? '', 80),
+            'message' => \Illuminate\Support\Str::limit($this->lead->message ?? '', 80),
         ];
     }
 }

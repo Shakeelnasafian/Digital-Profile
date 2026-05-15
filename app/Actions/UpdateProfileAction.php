@@ -2,9 +2,9 @@
 
 namespace App\Actions;
 
-use App\Models\Profile;
-use App\Http\Requests\ProfileRequest;
 use App\Actions\Traits\GeneratesQrCode;
+use App\Http\Requests\ProfileRequest;
+use App\Models\Profile;
 
 class UpdateProfileAction
 {
@@ -24,7 +24,7 @@ class UpdateProfileAction
         }
 
         // If user provided a custom slug, apply it as the profile's URL slug
-        if (!empty($data['custom_slug'])) {
+        if (! empty($data['custom_slug'])) {
             $data['slug'] = strtolower($data['custom_slug']);
         }
         unset($data['custom_slug']);

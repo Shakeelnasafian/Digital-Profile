@@ -21,8 +21,8 @@ class Education extends Model
 
     protected $casts = [
         'is_current' => 'boolean',
-        'start_year'  => 'integer',
-        'end_year'    => 'integer',
+        'start_year' => 'integer',
+        'end_year' => 'integer',
     ];
 
     public function user()

@@ -2,8 +2,8 @@
 
 namespace App\Actions;
 
-use App\Models\Education;
 use App\Http\Requests\EducationRequest;
+use App\Models\Education;
 
 class UpdateEducationAction
 {

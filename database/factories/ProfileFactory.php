@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Profile>
@@ -29,7 +28,7 @@ class ProfileFactory extends Factory
             'website' => fake()->url(),
             'linkedin' => fake()->url(),
             'github' => fake()->url(),
-            'location' => fake()->city() . ', ' . fake()->country(),
+            'location' => fake()->city().', '.fake()->country(),
             'template' => 'default',
             'is_public' => true,
             'skills' => implode(',', fake()->words(5)),

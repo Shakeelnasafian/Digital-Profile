@@ -21,23 +21,23 @@ class GenerateBioAction
         }
 
         $systemPrompt = 'You are a professional bio writer. Write a concise 2-3 sentence professional bio. '
-            . 'Be direct, confident, and avoid clichés. Return only the bio text, no labels, no commentary, no quotes.';
+            .'Be direct, confident, and avoid clichés. Return only the bio text, no labels, no commentary, no quotes.';
 
         $userPrompt = implode('. ', array_filter([
-            $profile->display_name ? 'Name: ' . $profile->display_name : null,
-            $profile->job_title    ? 'Title: ' . $profile->job_title    : null,
-            'Context: ' . $context,
+            $profile->display_name ? 'Name: '.$profile->display_name : null,
+            $profile->job_title ? 'Title: '.$profile->job_title : null,
+            'Context: '.$context,
         ]));
 
         $response = Http::withToken($apiKey)
             ->timeout(30)
-            ->post(config('services.groq.base_url') . '/chat/completions', [
-                'model'       => 'llama-3.3-70b-versatile',
-                'messages'    => [
+            ->post(config('services.groq.base_url').'/chat/completions', [
+                'model' => 'llama-3.3-70b-versatile',
+                'messages' => [
                     ['role' => 'system', 'content' => $systemPrompt],
                     ['role' => 'user',   'content' => $userPrompt],
                 ],
-                'max_tokens'  => 200,
+                'max_tokens' => 200,
                 'temperature' => 0.7,
             ]);
 

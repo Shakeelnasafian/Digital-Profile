@@ -19,7 +19,7 @@ class ProfileViewMilestoneNotification extends Notification
     public function toDatabase(object $notifiable): array
     {
         return [
-            'type'      => 'milestone',
+            'type' => 'milestone',
             'milestone' => $this->milestone,
         ];
     }

@@ -14,13 +14,13 @@ class ServiceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title'          => ['required', 'string', 'max:255'],
-            'description'    => ['nullable', 'string', 'max:2000'],
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:2000'],
             'starting_price' => ['nullable', 'numeric', 'min:0'],
-            'currency'       => ['required', 'string', 'size:3'],
-            'cta_label'      => ['nullable', 'string', 'max:100'],
-            'cta_url'        => ['nullable', 'url'],
-            'sort_order'     => ['integer', 'min:0'],
+            'currency' => ['required', 'string', 'size:3'],
+            'cta_label' => ['nullable', 'string', 'max:100'],
+            'cta_url' => ['nullable', 'url'],
+            'sort_order' => ['integer', 'min:0'],
         ];
     }
 }

@@ -20,9 +20,9 @@ class NewTestimonialNotification extends Notification
     public function toDatabase(object $notifiable): array
     {
         return [
-            'type'          => 'new_testimonial',
+            'type' => 'new_testimonial',
             'reviewer_name' => $this->testimonial->reviewer_name,
-            'rating'        => $this->testimonial->rating,
+            'rating' => $this->testimonial->rating,
         ];
     }
 }

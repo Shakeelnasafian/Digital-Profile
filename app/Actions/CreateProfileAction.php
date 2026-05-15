@@ -2,18 +2,18 @@
 
 namespace App\Actions;
 
-use App\Models\Profile;
-use App\Http\Requests\ProfileRequest;
 use App\Actions\Traits\GeneratesQrCode;
+use App\Http\Requests\ProfileRequest;
+use App\Models\Profile;
 
 class CreateProfileAction
 {
     use GeneratesQrCode;
-    
+
     public function handle(ProfileRequest $request): Profile
     {
         $data = $request->validated();
-        
+
         if ($request->hasFile('profile_image')) {
             $path = $request->file('profile_image')->store('profiles', 'public');
             $data['profile_image'] = $path;
@@ -28,5 +28,4 @@ class CreateProfileAction
 
         return $profile;
     }
-
 }

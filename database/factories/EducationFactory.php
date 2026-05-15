@@ -22,7 +22,7 @@ class EducationFactory extends Factory
 
         return [
             'user_id' => User::factory(),
-            'institution' => fake()->company() . ' University',
+            'institution' => fake()->company().' University',
             'degree' => fake()->randomElement(['Bachelor of Science', 'Master of Science', 'PhD', 'Bachelor of Arts']),
             'field_of_study' => fake()->randomElement(['Computer Science', 'Engineering', 'Business', 'Mathematics', 'Physics']),
             'start_year' => $startYear,

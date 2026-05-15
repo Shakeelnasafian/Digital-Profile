@@ -2,8 +2,8 @@
 
 namespace App\Actions;
 
-use App\Models\Service;
 use App\Http\Requests\ServiceRequest;
+use App\Models\Service;
 
 class CreateServiceAction
 {

@@ -22,7 +22,7 @@ class Experience extends Model
     protected $casts = [
         'is_current' => 'boolean',
         'start_date' => 'date',
-        'end_date'   => 'date',
+        'end_date' => 'date',
     ];
 
     public function user()

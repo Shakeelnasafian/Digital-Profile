@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\RedirectResponse;
-use App\Models\Profile;
 use App\Actions\RemoveCustomDomainAction;
+use App\Models\Profile;
+use Illuminate\Http\RedirectResponse;
 
 class RemoveCustomDomainController extends Controller
 {

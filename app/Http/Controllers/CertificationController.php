@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Inertia\Inertia;
-use App\Models\Certification;
 use App\Actions\CreateCertificationAction;
 use App\Actions\UpdateCertificationAction;
 use App\Http\Requests\CertificationRequest;
 use App\Http\Resources\CertificationResource;
+use App\Models\Certification;
+use Inertia\Inertia;
 
 class CertificationController extends Controller
 {

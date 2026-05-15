@@ -14,11 +14,11 @@ class TestimonialRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'reviewer_name'    => ['required', 'string', 'max:255'],
-            'reviewer_title'   => ['nullable', 'string', 'max:255'],
+            'reviewer_name' => ['required', 'string', 'max:255'],
+            'reviewer_title' => ['nullable', 'string', 'max:255'],
             'reviewer_company' => ['nullable', 'string', 'max:255'],
-            'content'          => ['required', 'string', 'max:2000'],
-            'rating'           => ['required', 'integer', 'min:1', 'max:5'],
+            'content' => ['required', 'string', 'max:2000'],
+            'rating' => ['required', 'integer', 'min:1', 'max:5'],
         ];
     }
 }

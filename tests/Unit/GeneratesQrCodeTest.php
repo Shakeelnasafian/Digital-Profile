@@ -15,7 +15,8 @@ test('generates qr code for profile', function () {
     $user = User::factory()->create();
     $profile = Profile::factory()->create(['user_id' => $user->id]);
 
-    $trait = new class {
+    $trait = new class
+    {
         use GeneratesQrCode;
 
         public function generate(Profile $profile): void
@@ -37,7 +38,8 @@ test('qr code contains profile url with qr ref parameter', function () {
     $user = User::factory()->create();
     $profile = Profile::factory()->create(['user_id' => $user->id]);
 
-    $trait = new class {
+    $trait = new class
+    {
         use GeneratesQrCode;
 
         public function generate(Profile $profile): void
@@ -59,7 +61,8 @@ test('qr code is saved as svg format', function () {
     $user = User::factory()->create();
     $profile = Profile::factory()->create(['user_id' => $user->id]);
 
-    $trait = new class {
+    $trait = new class
+    {
         use GeneratesQrCode;
 
         public function generate(Profile $profile): void
@@ -86,7 +89,8 @@ test('qr code updates profile qr_code_url field', function () {
 
     expect($profile->getRawOriginal('qr_code_url'))->toBeNull();
 
-    $trait = new class {
+    $trait = new class
+    {
         use GeneratesQrCode;
 
         public function generate(Profile $profile): void
@@ -106,7 +110,8 @@ test('regenerating qr code replaces existing file', function () {
     $user = User::factory()->create();
     $profile = Profile::factory()->create(['user_id' => $user->id]);
 
-    $trait = new class {
+    $trait = new class
+    {
         use GeneratesQrCode;
 
         public function generate(Profile $profile): void
@@ -135,7 +140,8 @@ test('qr code path uses profile slug', function () {
         'user_id' => $user->id,
     ]);
 
-    $trait = new class {
+    $trait = new class
+    {
         use GeneratesQrCode;
 
         public function generate(Profile $profile): void

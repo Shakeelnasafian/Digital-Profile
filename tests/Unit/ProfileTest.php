@@ -1,9 +1,9 @@
 <?php
 
+use App\Models\Certification;
+use App\Models\Education;
 use App\Models\Profile;
 use App\Models\User;
-use App\Models\Education;
-use App\Models\Certification;
 use Illuminate\Support\Facades\Storage;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);

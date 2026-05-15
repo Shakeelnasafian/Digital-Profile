@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Inertia\Inertia;
-use App\Models\Lead;
-use App\Models\Profile;
 use App\Actions\SubmitLeadAction;
 use App\Http\Requests\LeadRequest;
 use App\Http\Resources\LeadResource;
+use App\Models\Lead;
+use App\Models\Profile;
+use Inertia\Inertia;
 
 class LeadController extends Controller
 {

@@ -11,9 +11,9 @@ class RemoveCustomDomainAction
     public function __invoke(Profile $profile): void
     {
         $profile->update([
-            'custom_domain'            => null,
+            'custom_domain' => null,
             'domain_verification_token' => null,
-            'domain_verified_at'       => null,
+            'domain_verified_at' => null,
         ]);
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Actions;
 
-use App\Models\Certification;
 use App\Http\Requests\CertificationRequest;
+use App\Models\Certification;
 
 class CreateCertificationAction
 {

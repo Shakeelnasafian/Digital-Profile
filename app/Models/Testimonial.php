@@ -19,9 +19,9 @@ class Testimonial extends Model
     ];
 
     protected $casts = [
-        'created_at'  => 'datetime',
+        'created_at' => 'datetime',
         'is_approved' => 'boolean',
-        'rating'      => 'integer',
+        'rating' => 'integer',
     ];
 
     public function profile()

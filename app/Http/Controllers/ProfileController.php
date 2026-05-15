@@ -4,24 +4,24 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Inertia\Inertia;
-use Inertia\Response as InertiaResponse;
-use App\Models\Profile;
 use App\Actions\CreateProfileAction;
 use App\Actions\DeleteProfileAction;
 use App\Actions\GenerateVCardAction;
 use App\Actions\UpdateProfileAction;
 use App\Http\Requests\ProfileRequest;
 use App\Http\Resources\ProfileResource;
+use App\Models\Profile;
 use App\Services\AnalyticsService;
 use App\Services\DashboardService;
 use App\Services\PdfExportService;
 use App\Services\ProfileShowService;
 use App\Services\PublicProfileService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
 
 class ProfileController extends Controller
 {
@@ -113,8 +113,8 @@ class ProfileController extends Controller
         $vcard = $action($profile);
 
         return response($vcard['content'], 200, [
-            'Content-Type'        => 'text/vcard; charset=utf-8',
-            'Content-Disposition' => 'attachment; filename="' . $vcard['filename'] . '"',
+            'Content-Type' => 'text/vcard; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="'.$vcard['filename'].'"',
         ]);
     }
 
@@ -134,7 +134,7 @@ class ProfileController extends Controller
         $profileId = $request->query('profile_id');
 
         $exists = Profile::where('slug', $slug)
-            ->when($profileId, fn($q) => $q->where('id', '!=', $profileId))
+            ->when($profileId, fn ($q) => $q->where('id', '!=', $profileId))
             ->exists();
 
         return response()->json(['available' => ! $exists]);

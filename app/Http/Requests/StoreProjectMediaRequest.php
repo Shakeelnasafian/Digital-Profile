@@ -16,7 +16,7 @@ class StoreProjectMediaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'files'   => 'required|array',
+            'files' => 'required|array',
             'files.*' => 'required|file|mimes:jpg,jpeg,png,gif,webp,mp4,webm|max:10240',
         ];
     }

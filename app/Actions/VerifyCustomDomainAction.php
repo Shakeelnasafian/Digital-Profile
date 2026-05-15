@@ -17,11 +17,12 @@ class VerifyCustomDomainAction
             ]);
         }
 
-        $lookupHost = '_digital-profile.' . $profile->custom_domain;
-        $records    = @dns_get_record($lookupHost, DNS_TXT) ?: [];
+        $lookupHost = '_digital-profile.'.$profile->custom_domain;
+        $records = @dns_get_record($lookupHost, DNS_TXT) ?: [];
 
         $verified = collect($records)->contains(function (array $record) use ($profile): bool {
             $txt = $record['txt'] ?? $record['entries'][0] ?? '';
+
             return $txt === $profile->domain_verification_token;
         });
 

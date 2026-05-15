@@ -1,13 +1,13 @@
 <?php
 
-use App\Http\Resources\ProfileResource;
-use App\Http\Resources\EducationResource;
 use App\Http\Resources\CertificationResource;
+use App\Http\Resources\EducationResource;
 use App\Http\Resources\ExperienceResource;
+use App\Http\Resources\ProfileResource;
 use App\Http\Resources\ProjectResource;
-use App\Models\Profile;
-use App\Models\Education;
 use App\Models\Certification;
+use App\Models\Education;
+use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -27,7 +27,7 @@ test('profile resource contains correct data', function () {
         'github', 'twitter', 'instagram', 'youtube', 'tiktok',
         'dribbble', 'behance', 'medium', 'location', 'skills',
         'template', 'is_public', 'profile_views', 'profile_image',
-        'qr_code_url', 'availability_status', 'scheduling_url'
+        'qr_code_url', 'availability_status', 'scheduling_url',
     ]);
 });
 
@@ -90,7 +90,7 @@ test('education resource contains correct data', function () {
 
     expect($data)->toHaveKeys([
         'id', 'institution', 'degree', 'field_of_study',
-        'start_year', 'end_year', 'is_current', 'description'
+        'start_year', 'end_year', 'is_current', 'description',
     ]);
 });
 
@@ -136,7 +136,7 @@ test('certification resource contains correct data', function () {
 
     expect($data)->toHaveKeys([
         'id', 'title', 'issuer', 'issue_date', 'expiry_date',
-        'credential_url', 'credential_id'
+        'credential_url', 'credential_id',
     ]);
 });
 
@@ -184,7 +184,7 @@ test('certification resource transforms data correctly', function () {
 
 // ExperienceResource Tests
 test('experience resource contains correct keys', function () {
-    $resource = new ExperienceResource((object)[
+    $resource = new ExperienceResource((object) [
         'id' => 1,
         'company' => 'Tech Corp',
         'position' => 'Developer',
@@ -199,13 +199,13 @@ test('experience resource contains correct keys', function () {
 
     expect($data)->toHaveKeys([
         'id', 'company', 'position', 'location',
-        'start_date', 'end_date', 'is_current', 'description'
+        'start_date', 'end_date', 'is_current', 'description',
     ]);
 });
 
 // ProjectResource Tests
 test('project resource contains correct keys', function () {
-    $resource = new ProjectResource((object)[
+    $resource = new ProjectResource((object) [
         'id' => 1,
         'name' => 'Test Project',
         'description' => 'A test project',
@@ -221,7 +221,7 @@ test('project resource contains correct keys', function () {
 
     expect($data)->toHaveKeys([
         'id', 'name', 'description', 'project_url',
-        'image', 'start_date', 'end_date', 'status', 'created_at'
+        'image', 'start_date', 'end_date', 'status', 'created_at',
     ]);
 });
 
