@@ -6,7 +6,6 @@ use App\Models\Profile;
 use App\Models\ProfileViewEvent;
 use App\Notifications\ProfileViewMilestoneNotification;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 
 class AnalyticsService
 {
@@ -24,11 +23,11 @@ class AnalyticsService
         }
 
         ProfileViewEvent::create([
-            'profile_id'  => $profile->id,
+            'profile_id' => $profile->id,
             'device_type' => $this->detectDevice($request->userAgent() ?? ''),
-            'referrer'    => $this->categoriseReferrer($request),
-            'is_qr_scan'  => $request->query('ref') === 'qr',
-            'viewed_at'   => now(),
+            'referrer' => $this->categoriseReferrer($request),
+            'is_qr_scan' => $request->query('ref') === 'qr',
+            'viewed_at' => now(),
         ]);
     }
 
@@ -60,8 +59,8 @@ class AnalyticsService
             ->toArray();
 
         return [
-            'mobile'  => $rows['mobile'] ?? 0,
-            'tablet'  => $rows['tablet'] ?? 0,
+            'mobile' => $rows['mobile'] ?? 0,
+            'tablet' => $rows['tablet'] ?? 0,
             'desktop' => $rows['desktop'] ?? 0,
         ];
     }
@@ -74,7 +73,7 @@ class AnalyticsService
             ->orderByDesc('count')
             ->limit($limit)
             ->get()
-            ->map(fn($r) => ['referrer' => $r->referrer, 'count' => $r->count])
+            ->map(fn ($r) => ['referrer' => $r->referrer, 'count' => $r->count])
             ->toArray();
     }
 
@@ -108,13 +107,13 @@ class AnalyticsService
         $host = strtolower(parse_url($referer, PHP_URL_HOST) ?? '');
 
         $map = [
-            'linkedin'  => 'linkedin',
-            'whatsapp'  => 'whatsapp',
-            'twitter'   => 'twitter',
-            't.co'      => 'twitter',
+            'linkedin' => 'linkedin',
+            'whatsapp' => 'whatsapp',
+            'twitter' => 'twitter',
+            't.co' => 'twitter',
             'instagram' => 'instagram',
-            'facebook'  => 'facebook',
-            'youtube'   => 'youtube',
+            'facebook' => 'facebook',
+            'youtube' => 'youtube',
         ];
 
         foreach ($map as $keyword => $label) {

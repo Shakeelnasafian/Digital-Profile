@@ -17,13 +17,13 @@ class PdfExportService
 {
     public function export(Profile $profile, int $userId): Response
     {
-        $experiences    = Experience::where('user_id', $userId)->orderBy('start_date', 'desc')->get();
-        $educations     = Education::where('user_id', $userId)->orderByDesc('start_year')->get();
+        $experiences = Experience::where('user_id', $userId)->orderBy('start_date', 'desc')->get();
+        $educations = Education::where('user_id', $userId)->orderByDesc('start_year')->get();
         $certifications = Certification::where('user_id', $userId)->orderByDesc('issue_date')->get();
-        $projects       = Project::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
+        $projects = Project::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
 
-        $pdf      = Pdf::loadView('pdf.resume', compact('profile', 'experiences', 'educations', 'certifications', 'projects'));
-        $filename = Str::slug($profile->display_name ?? 'resume') . '_resume.pdf';
+        $pdf = Pdf::loadView('pdf.resume', compact('profile', 'experiences', 'educations', 'certifications', 'projects'));
+        $filename = Str::slug($profile->display_name ?? 'resume').'_resume.pdf';
 
         return $pdf->download($filename);
     }

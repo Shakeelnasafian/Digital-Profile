@@ -2,9 +2,9 @@
 
 namespace App\Actions;
 
+use App\Http\Requests\TestimonialRequest;
 use App\Models\Profile;
 use App\Models\Testimonial;
-use App\Http\Requests\TestimonialRequest;
 use App\Notifications\NewTestimonialNotification;
 
 class SubmitTestimonialAction
@@ -13,7 +13,7 @@ class SubmitTestimonialAction
     {
         $testimonial = Testimonial::create([
             ...$request->validated(),
-            'profile_id'  => $profile->id,
+            'profile_id' => $profile->id,
             'is_approved' => false,
         ]);
 

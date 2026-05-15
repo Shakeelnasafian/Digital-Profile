@@ -17,7 +17,7 @@ class Certification extends Model
     ];
 
     protected $casts = [
-        'issue_date'  => 'date',
+        'issue_date' => 'date',
         'expiry_date' => 'date',
     ];
 

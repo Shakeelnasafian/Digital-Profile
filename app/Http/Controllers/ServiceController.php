@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Inertia\Inertia;
-use App\Models\Service;
 use App\Actions\CreateServiceAction;
 use App\Actions\UpdateServiceAction;
 use App\Http\Requests\ServiceRequest;
 use App\Http\Resources\ServiceResource;
+use App\Models\Service;
+use Inertia\Inertia;
 
 class ServiceController extends Controller
 {

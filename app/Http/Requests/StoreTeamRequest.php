@@ -16,10 +16,10 @@ class StoreTeamRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'        => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
-            'website'     => 'nullable|url|max:255',
-            'logo'        => 'nullable|image|max:2048',
+            'website' => 'nullable|url|max:255',
+            'logo' => 'nullable|image|max:2048',
         ];
     }
 }

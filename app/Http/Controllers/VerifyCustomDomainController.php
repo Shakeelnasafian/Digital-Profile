@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\RedirectResponse;
-use App\Models\Profile;
 use App\Actions\VerifyCustomDomainAction;
+use App\Models\Profile;
+use Illuminate\Http\RedirectResponse;
 
 class VerifyCustomDomainController extends Controller
 {
@@ -18,6 +18,6 @@ class VerifyCustomDomainController extends Controller
 
         $action($profile);
 
-        return redirect()->back()->with('success', 'Domain verified successfully! Your profile is now live at ' . $profile->custom_domain);
+        return redirect()->back()->with('success', 'Domain verified successfully! Your profile is now live at '.$profile->custom_domain);
     }
 }

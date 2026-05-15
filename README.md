@@ -2,6 +2,23 @@
 
 Create, manage, and share your professional digital profile with a scannable digital card, analytics, social proof tools, and a polished public page.
 
+## Live Demo
+
+🌐 **[digital-profile-ki8m.onrender.com](https://digital-profile-ki8m.onrender.com)**
+
+> Hosted on Render Free — first request after idle may take ~30 seconds to wake the container.
+
+Sign in with either demo account:
+
+| Email | Password |
+| --- | --- |
+| `maya.chen@demo.digitalprofile.test` | `DemoPass#2026` |
+| `omar.rahman@demo.digitalprofile.test` | `DemoPass#2026` |
+
+Both accounts are pre-populated with portfolio data (projects, experience, services, testimonials, leads, analytics) so you can explore the full feature surface without setting anything up.
+
+> If the demo accounts haven't been seeded yet, registration is open — sign up at [/register](https://digital-profile-ki8m.onrender.com/register) to create your own profile and try the platform end-to-end.
+
 ## Overview
 
 Digital Profile lets you build a public profile that serves as your single professional link. It combines a digital business card with a full portfolio — projects, experience, education, certifications, services, and testimonials — and gives you analytics, lead capture, PDF resume export, and sharing tools.
@@ -16,6 +33,7 @@ Digital Profile lets you build a public profile that serves as your single profe
 - Three public profile templates: `default` (clean minimal), `bold` (dark hero), `glass` (frosted gradient)
 - Availability badge: Available / Open to Opportunities / Not Available
 - Scheduling link integration (Calendly, Cal.com, etc.)
+- **AI bio generator** — Groq-powered (Llama 3.3 70B) one-click bio drafting from your role and a short free-text context (requires `GROQ_API_KEY`)
 
 ### Contact & Social
 
@@ -32,6 +50,13 @@ Digital Profile lets you build a public profile that serves as your single profe
 - Education (timeline)
 - Certifications (card grid with verify link)
 - Services (card grid with pricing and CTA buttons)
+
+### Teams
+
+- Group multiple profiles under a shared team workspace
+- Owner + member roles, managed from the team's settings page
+- Auto-generated unique slug, team logo, description, and website
+- Public team page at `/t/{slug}` showcasing every member's profile
 
 ### Social Proof & Lead Generation
 
@@ -59,6 +84,7 @@ Digital Profile lets you build a public profile that serves as your single profe
 - Download vCard (Save Contact)
 - Download QR code as PNG (canvas-based in-browser conversion)
 - QR code auto-generated on profile creation; regenerated on slug change
+- **Custom domain mapping** — point your own domain at your profile via CNAME with token-based verification; verified domains automatically serve the public page
 
 ## User Flow
 
@@ -79,12 +105,16 @@ Digital Profile lets you build a public profile that serves as your single profe
 - **Vite** — bundler
 - **Tailwind CSS 4** — styling
 - **Radix UI** — accessible component primitives
-- **SQLite** (default) or MySQL
+- **SQLite** (local dev) or **PostgreSQL** (production)
 - **SimpleSoftwareIO/QrCode** — QR code generation
 - **barryvdh/laravel-dompdf** — PDF resume export
 - **ApexCharts** — dashboard analytics charts
 - **FontAwesome brands** — social platform icons
 - **Lucide React** — UI icons
+- **Groq Cloud API** (Llama 3.3 70B) — AI bio generation
+- **Docker · nginx · PHP-FPM · Supervisord** — containerized production image
+- **Render** — production hosting target
+- **Neon** — managed Postgres provider used in production
 
 ## Getting Started
 
@@ -161,6 +191,54 @@ Digital Profile lets you build a public profile that serves as your single profe
     ```sh
     composer run dev
     ```
+
+## Deployment
+
+The repository ships with a production-ready Docker image and a Render-friendly entrypoint.
+
+### Live deployment
+
+- **Hosting:** [Render](https://render.com) — Web Service, Docker runtime
+- **Database:** [Neon](https://neon.tech) — managed PostgreSQL
+- **Live URL:** <https://digital-profile-ki8m.onrender.com>
+
+### Image architecture
+
+The `Dockerfile` is a three-stage build:
+
+1. **`composer-deps`** — installs PHP dependencies with `--no-dev` and an optimized autoloader.
+2. **`node-deps`** — runs `npm ci` and builds Vite assets (`public/build`).
+3. **`production`** — final `php:8.2-fpm-alpine` image with nginx serving `${PORT}`, PHP-FPM on port 9000, and Supervisord managing both processes. Build-time PHP extensions (`pdo_mysql`, `pdo_pgsql`, `gd`, `zip`, `mbstring`, `bcmath`, `pcntl`, `redis`) are compiled against a virtual `.build-deps` group that is purged after install.
+
+On first boot, [`docker/entrypoint.sh`](docker/entrypoint.sh) templates the nginx config with `${PORT}`, runs `php artisan storage:link --force`, caches config/routes/views when `APP_ENV=production`, and runs `php artisan migrate --force`. Supervisord then takes over as PID 1.
+
+### Required environment variables
+
+Set these in your hosting provider's environment panel before the first deploy:
+
+| Key | Example / Required value | Purpose |
+| --- | --- | --- |
+| `APP_KEY` | `base64:...` (from `php artisan key:generate --show`) | Laravel encryption key |
+| `APP_ENV` | `production` | Triggers config/route/view caching at boot |
+| `APP_DEBUG` | `false` | — |
+| `APP_URL` | `https://your-app.onrender.com` | Must be `https://` so canonical URLs and emails are correct |
+| `LOG_CHANNEL` | `stderr` | Streams logs to stdout/stderr for the platform to capture |
+| `DB_CONNECTION` | `pgsql` | — |
+| `DB_URL` | `postgresql://user:pass@host/db?sslmode=require` | Full Neon connection string (preferred), or use the split `DB_HOST` / `DB_PORT` / `DB_DATABASE` / `DB_USERNAME` / `DB_PASSWORD` form instead |
+| `GROQ_API_KEY` | `gsk_...` (optional) | Enables the AI bio generator; omit to disable that feature |
+
+### Trusted proxies
+
+Laravel is configured to trust Render's reverse proxy (`X-Forwarded-Proto`, `X-Forwarded-Host`, etc.) in [`bootstrap/app.php`](bootstrap/app.php). This makes asset URLs render with `https://` even though traffic reaches the container over plain HTTP inside Render's network.
+
+### Deploy
+
+With env vars set, push to `main` and Render's auto-deploy rebuilds the image, runs the entrypoint (migrations included), and serves on the assigned `$PORT`. A manual deploy is available from the Render dashboard under **Manual Deploy → Deploy latest commit**.
+
+### Caveats
+
+- Render Free instances **sleep on idle** — the first request after sleep can take ~30 seconds to wake the container.
+- The container filesystem is **ephemeral**; user-uploaded files in `storage/app/public/` are lost on restart. Attach a Render Disk (paid) or move uploads to S3-compatible storage for persistence.
 
 ## Useful Scripts
 

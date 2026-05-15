@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Inertia\Inertia;
-use App\Models\Education;
 use App\Actions\CreateEducationAction;
 use App\Actions\UpdateEducationAction;
 use App\Http\Requests\EducationRequest;
 use App\Http\Resources\EducationResource;
+use App\Models\Education;
+use Inertia\Inertia;
 
 class EducationController extends Controller
 {

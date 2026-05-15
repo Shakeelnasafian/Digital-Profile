@@ -12,9 +12,9 @@ class InitiateCustomDomainAction
     public function __invoke(Profile $profile, string $domain): Profile
     {
         $profile->update([
-            'custom_domain'            => $domain,
-            'domain_verification_token' => 'dp-verify-' . Str::random(32),
-            'domain_verified_at'       => null,
+            'custom_domain' => $domain,
+            'domain_verification_token' => 'dp-verify-'.Str::random(32),
+            'domain_verified_at' => null,
         ]);
 
         return $profile->fresh();

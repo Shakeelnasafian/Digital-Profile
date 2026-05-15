@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\RedirectResponse;
-use Inertia\Inertia;
-use Inertia\Response;
-use App\Models\Profile;
-use App\Models\Team;
 use App\Actions\AddTeamMemberAction;
 use App\Actions\CreateTeamAction;
 use App\Actions\DeleteTeamAction;
 use App\Actions\RemoveTeamMemberAction;
 use App\Http\Requests\AddTeamMemberRequest;
 use App\Http\Requests\StoreTeamRequest;
+use App\Models\Profile;
+use App\Models\Team;
+use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class TeamController extends Controller
 {
@@ -37,24 +37,24 @@ class TeamController extends Controller
             ->where('owner_user_id', auth()->id())
             ->firstOrFail();
 
-        $members = $team->members()->get()->map(fn($u) => [
-            'id'      => $u->id,
-            'name'    => $u->name,
-            'email'   => $u->email,
-            'role'    => $u->pivot->role,
+        $members = $team->members()->get()->map(fn ($u) => [
+            'id' => $u->id,
+            'name' => $u->name,
+            'email' => $u->email,
+            'role' => $u->pivot->role,
             'profile' => Profile::where('user_id', $u->id)
                 ->select('slug', 'display_name', 'job_title', 'profile_image')
                 ->first(),
         ]);
 
         return Inertia::render('team/manage', [
-            'team'    => [
-                'id'          => $team->id,
-                'name'        => $team->name,
-                'slug'        => $team->slug,
+            'team' => [
+                'id' => $team->id,
+                'name' => $team->name,
+                'slug' => $team->slug,
                 'description' => $team->description,
-                'website'     => $team->website,
-                'logo_url'    => $team->logo_url,
+                'website' => $team->website,
+                'logo_url' => $team->logo_url,
             ],
             'members' => $members,
         ]);
@@ -92,27 +92,27 @@ class TeamController extends Controller
                 ->first();
 
             return [
-                'id'      => $user->id,
-                'name'    => $user->name,
-                'role'    => $user->pivot->role,
+                'id' => $user->id,
+                'name' => $user->name,
+                'role' => $user->pivot->role,
                 'profile' => $profile ? [
-                    'slug'                => $profile->slug,
-                    'display_name'        => $profile->display_name,
-                    'job_title'           => $profile->job_title,
-                    'profile_image'       => $profile->profile_image,
-                    'location'            => $profile->location,
+                    'slug' => $profile->slug,
+                    'display_name' => $profile->display_name,
+                    'job_title' => $profile->job_title,
+                    'profile_image' => $profile->profile_image,
+                    'location' => $profile->location,
                     'availability_status' => $profile->availability_status,
                 ] : null,
             ];
-        })->filter(fn($m) => $m['profile'] !== null)->values();
+        })->filter(fn ($m) => $m['profile'] !== null)->values();
 
         return Inertia::render('team/show', [
-            'team'    => [
-                'name'        => $team->name,
-                'slug'        => $team->slug,
+            'team' => [
+                'name' => $team->name,
+                'slug' => $team->slug,
                 'description' => $team->description,
-                'website'     => $team->website,
-                'logo_url'    => $team->logo_url,
+                'website' => $team->website,
+                'logo_url' => $team->logo_url,
             ],
             'members' => $members,
         ]);
@@ -122,25 +122,25 @@ class TeamController extends Controller
     {
         $userId = auth()->id();
 
-        $ownedTeams = Team::where('owner_user_id', $userId)->get()->map(fn($t) => [
-            'id'       => $t->id,
-            'name'     => $t->name,
-            'slug'     => $t->slug,
+        $ownedTeams = Team::where('owner_user_id', $userId)->get()->map(fn ($t) => [
+            'id' => $t->id,
+            'name' => $t->name,
+            'slug' => $t->slug,
             'logo_url' => $t->logo_url,
-            'role'     => 'owner',
-            'members'  => $t->members()->count(),
+            'role' => 'owner',
+            'members' => $t->members()->count(),
         ]);
 
-        $memberTeams = Team::whereHas('members', fn($q) => $q->where('user_id', $userId))
+        $memberTeams = Team::whereHas('members', fn ($q) => $q->where('user_id', $userId))
             ->where('owner_user_id', '!=', $userId)
             ->get()
-            ->map(fn($t) => [
-                'id'       => $t->id,
-                'name'     => $t->name,
-                'slug'     => $t->slug,
+            ->map(fn ($t) => [
+                'id' => $t->id,
+                'name' => $t->name,
+                'slug' => $t->slug,
                 'logo_url' => $t->logo_url,
-                'role'     => 'member',
-                'members'  => $t->members()->count(),
+                'role' => 'member',
+                'members' => $t->members()->count(),
             ]);
 
         return Inertia::render('team/index', [

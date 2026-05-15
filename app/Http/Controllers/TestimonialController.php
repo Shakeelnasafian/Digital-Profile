@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\RedirectResponse;
-use Inertia\Inertia;
-use Inertia\Response;
-use App\Models\Profile;
-use App\Models\Testimonial;
 use App\Actions\ApproveTestimonialAction;
 use App\Actions\SubmitTestimonialAction;
 use App\Http\Requests\TestimonialRequest;
 use App\Http\Resources\TestimonialResource;
+use App\Models\Profile;
+use App\Models\Testimonial;
+use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class TestimonialController extends Controller
 {
@@ -24,7 +24,7 @@ class TestimonialController extends Controller
 
         return Inertia::render('testimonials/submit', [
             'profile_name' => $profile->display_name,
-            'slug'         => $profile->slug,
+            'slug' => $profile->slug,
         ]);
     }
 

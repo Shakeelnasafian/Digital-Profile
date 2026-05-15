@@ -15,7 +15,7 @@ class Team extends Model
         static::creating(function (Team $team) {
             $base = Str::slug($team->name);
             do {
-                $slug = $base . '-' . Str::random(4);
+                $slug = $base.'-'.Str::random(4);
             } while (self::where('slug', $slug)->exists());
 
             $team->slug = $slug;

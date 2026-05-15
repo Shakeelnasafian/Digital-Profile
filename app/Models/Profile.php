@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Profile extends Model
 {
@@ -52,10 +52,10 @@ class Profile extends Model
     {
         static::creating(function ($model) {
             $emailPart = explode('@', $model->email)[0];
-            $baseSlug = Str::slug($model->display_name . '-' . $emailPart);
+            $baseSlug = Str::slug($model->display_name.'-'.$emailPart);
 
             do {
-                $slug = $baseSlug . '-' . Str::random(3);
+                $slug = $baseSlug.'-'.Str::random(3);
             } while (self::where('slug', $slug)->exists());
 
             $model->slug = strtolower($slug);

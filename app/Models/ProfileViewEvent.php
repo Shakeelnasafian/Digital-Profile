@@ -18,7 +18,7 @@ class ProfileViewEvent extends Model
 
     protected $casts = [
         'is_qr_scan' => 'boolean',
-        'viewed_at'  => 'datetime',
+        'viewed_at' => 'datetime',
     ];
 
     public function profile()

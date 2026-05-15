@@ -24,8 +24,8 @@ class GenerateBioRequest extends FormRequest
     {
         return [
             'context.required' => 'Please provide some context about yourself.',
-            'context.min'      => 'Please provide at least 10 characters of context.',
-            'context.max'      => 'Context must be 500 characters or fewer.',
+            'context.min' => 'Please provide at least 10 characters of context.',
+            'context.max' => 'Context must be 500 characters or fewer.',
         ];
     }
 }

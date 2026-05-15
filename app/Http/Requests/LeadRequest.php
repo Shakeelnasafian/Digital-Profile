@@ -14,10 +14,10 @@ class LeadRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'visitor_name'  => ['required', 'string', 'max:255'],
+            'visitor_name' => ['required', 'string', 'max:255'],
             'visitor_email' => ['required', 'email', 'max:255'],
             'visitor_phone' => ['nullable', 'string', 'max:30'],
-            'message'       => ['nullable', 'string', 'max:2000'],
+            'message' => ['nullable', 'string', 'max:2000'],
         ];
     }
 }

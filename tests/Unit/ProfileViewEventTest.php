@@ -16,7 +16,7 @@ test('profile view event belongs to profile', function () {
 });
 
 test('profile view event has timestamps disabled', function () {
-    $event = new ProfileViewEvent();
+    $event = new ProfileViewEvent;
 
     expect($event->timestamps)->toBeFalse();
 });

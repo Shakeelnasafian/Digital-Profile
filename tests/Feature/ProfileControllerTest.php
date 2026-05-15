@@ -1,9 +1,9 @@
 <?php
 
+use App\Models\Certification;
+use App\Models\Education;
 use App\Models\Profile;
 use App\Models\User;
-use App\Models\Education;
-use App\Models\Certification;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -154,7 +154,7 @@ test('profile update handles image upload', function () {
     ]);
 
     $response->assertRedirect();
-    Storage::disk('public')->assertExists('profiles/' . $file->hashName());
+    Storage::disk('public')->assertExists('profiles/'.$file->hashName());
 });
 
 test('profile update with custom slug updates slug', function () {

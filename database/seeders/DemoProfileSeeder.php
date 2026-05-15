@@ -617,7 +617,7 @@ class DemoProfileSeeder extends Seeder
 
     private function writeDemoSvg(string $relativePath, string $title, string $accent, string $subtitle): string
     {
-        $fullPath = storage_path('app/public/' . $relativePath);
+        $fullPath = storage_path('app/public/'.$relativePath);
 
         File::ensureDirectoryExists(dirname($fullPath));
 
@@ -675,7 +675,6 @@ SVG;
     }
 
     /**
-     * @param  string  $startDate
      * @param  array<int, array{count: int, device_type: string, referrer: string, is_qr_scan?: bool}>  $patterns
      * @return array<int, array<string, mixed>>
      */

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
-use Closure;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use App\Models\Profile;
 use App\Services\AnalyticsService;
 use App\Services\PublicProfileService;
+use Closure;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\Response;
 
 class CustomDomainMiddleware
 {
@@ -21,11 +21,11 @@ class CustomDomainMiddleware
 
     public function handle(Request $request, Closure $next): Response
     {
-        $host    = $request->getHost();
+        $host = $request->getHost();
         $appHost = parse_url(config('app.url'), PHP_URL_HOST);
 
         // Only intercept requests for hosts that differ from the app's own domain
-        if ($host === $appHost || str_ends_with($host, '.' . $appHost)) {
+        if ($host === $appHost || str_ends_with($host, '.'.$appHost)) {
             return $next($request);
         }
 

@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ProfileRequest extends FormRequest
 {
@@ -18,32 +18,32 @@ class ProfileRequest extends FormRequest
 
         return [
             'display_name' => 'required|string|max:255',
-            'job_title'    => 'nullable|string|max:255',
-            'email'        => [
+            'job_title' => 'nullable|string|max:255',
+            'email' => [
                 'required',
                 'email',
                 Rule::unique('profiles', 'email')->ignore($profileId),
             ],
-            'phone'         => 'nullable|string|max:25',
-            'whatsapp'      => 'nullable|string|max:25',
-            'website'       => 'nullable|url',
-            'linkedin'      => 'nullable|url',
-            'github'        => 'nullable|url',
-            'location'      => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:25',
+            'whatsapp' => 'nullable|string|max:25',
+            'website' => 'nullable|url',
+            'linkedin' => 'nullable|url',
+            'github' => 'nullable|url',
+            'location' => 'nullable|string|max:255',
             'profile_image' => $this->isMethod('POST') ? 'nullable|image|max:2048' : 'nullable|image|max:2048',
-            'template'      => 'nullable|string|max:100',
-            'short_bio'     => 'nullable|string|max:1000',
-            'is_public'           => 'boolean',
-            'skills'              => 'nullable|string|max:2000',
-            'twitter'             => 'nullable|url',
-            'instagram'           => 'nullable|url',
-            'youtube'             => 'nullable|url',
-            'tiktok'              => 'nullable|url',
-            'dribbble'            => 'nullable|url',
-            'behance'             => 'nullable|url',
-            'medium'              => 'nullable|url',
+            'template' => 'nullable|string|max:100',
+            'short_bio' => 'nullable|string|max:1000',
+            'is_public' => 'boolean',
+            'skills' => 'nullable|string|max:2000',
+            'twitter' => 'nullable|url',
+            'instagram' => 'nullable|url',
+            'youtube' => 'nullable|url',
+            'tiktok' => 'nullable|url',
+            'dribbble' => 'nullable|url',
+            'behance' => 'nullable|url',
+            'medium' => 'nullable|url',
             'availability_status' => 'nullable|in:available,open_to_opportunities,not_available',
-            'scheduling_url'      => 'nullable|url',
+            'scheduling_url' => 'nullable|url',
         ];
     }
 }

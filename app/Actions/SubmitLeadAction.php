@@ -2,9 +2,9 @@
 
 namespace App\Actions;
 
+use App\Http\Requests\LeadRequest;
 use App\Models\Lead;
 use App\Models\Profile;
-use App\Http\Requests\LeadRequest;
 use App\Notifications\NewLeadNotification;
 
 class SubmitLeadAction

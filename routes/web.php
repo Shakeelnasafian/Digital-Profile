@@ -1,25 +1,25 @@
 <?php
 
-use Inertia\Inertia;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ProjectController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ExperienceController;
-use App\Http\Controllers\EducationController;
 use App\Http\Controllers\CertificationController;
-use App\Http\Controllers\LeadController;
-use App\Http\Controllers\TestimonialController;
-use App\Http\Controllers\ServiceController;
-use App\Http\Controllers\ProjectMediaController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\TeamController;
-use App\Http\Controllers\SaveCustomDomainController;
-use App\Http\Controllers\VerifyCustomDomainController;
-use App\Http\Controllers\RemoveCustomDomainController;
+use App\Http\Controllers\EducationController;
+use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\GenerateBioController;
+use App\Http\Controllers\LeadController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectMediaController;
+use App\Http\Controllers\RemoveCustomDomainController;
+use App\Http\Controllers\SaveCustomDomainController;
+use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\TeamController;
+use App\Http\Controllers\TestimonialController;
+use App\Http\Controllers\VerifyCustomDomainController;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 // Welcome page
-Route::get('/', fn() => Inertia::render('welcome'))->name('home');
+Route::get('/', fn () => Inertia::render('welcome'))->name('home');
 
 // Public profile — no auth required
 Route::get('/p/{slug}', [ProfileController::class, 'publicShow'])->name('profile.public');
@@ -110,5 +110,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('teams/{slug}', [TeamController::class, 'destroy'])->name('teams.destroy');
 });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';

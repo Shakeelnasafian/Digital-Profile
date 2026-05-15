@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\Certification;
-use App\Models\Education;
-use App\Models\Experience;
-use App\Models\Profile;
-use App\Models\Project;
 use App\Http\Resources\CertificationResource;
 use App\Http\Resources\EducationResource;
 use App\Http\Resources\ExperienceResource;
 use App\Http\Resources\ProfileResource;
 use App\Http\Resources\ProjectResource;
+use App\Models\Certification;
+use App\Models\Education;
+use App\Models\Experience;
+use App\Models\Profile;
+use App\Models\Project;
 
 class ProfileShowService
 {
@@ -37,10 +37,10 @@ class ProfileShowService
             ->get();
 
         return [
-            'profile'        => new ProfileResource($profile),
-            'projects'       => ProjectResource::collection($projects),
-            'experiences'    => ExperienceResource::collection($experiences),
-            'educations'     => EducationResource::collection($educations),
+            'profile' => new ProfileResource($profile),
+            'projects' => ProjectResource::collection($projects),
+            'experiences' => ExperienceResource::collection($experiences),
+            'educations' => EducationResource::collection($educations),
             'certifications' => CertificationResource::collection($certifications),
         ];
     }
