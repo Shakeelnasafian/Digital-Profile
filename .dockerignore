@@ -11,7 +11,5 @@ bootstrap/cache/*
 .env.*
 *.md
 tests/
-docker/
-nginx.conf
 docker-compose.yml
 .dockerignore

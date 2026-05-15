@@ -42,17 +42,27 @@ RUN npm run build
 # ============================================
 FROM php:8.2-fpm-alpine AS production
 
-# Install build deps + runtime deps
+# Runtime libraries kept permanently in the image
 RUN apk add --no-cache \
+        libpng \
+        libzip \
+        oniguruma \
+        libpq \
+        nginx \
+        supervisor \
+        gettext \
+        bash
+
+# Build dependencies installed as a virtual group, then removed after compile
+RUN apk add --no-cache --virtual .build-deps \
+        $PHPIZE_DEPS \
         libpng-dev \
         libzip-dev \
         oniguruma-dev \
-        autoconf \
-        gcc \
-        g++ \
-        make \
+        postgresql-dev \
     && docker-php-ext-install \
         pdo_mysql \
+        pdo_pgsql \
         mbstring \
         bcmath \
         gd \
@@ -60,15 +70,7 @@ RUN apk add --no-cache \
         pcntl \
     && pecl install redis \
     && docker-php-ext-enable redis \
-    # Remove build tools after compilation
-    && apk del --no-cache \
-        autoconf \
-        gcc \
-        g++ \
-        make \
-        libpng-dev \
-        libzip-dev \
-        oniguruma-dev
+    && apk del .build-deps
 
 WORKDIR /var/www/html
 
@@ -82,6 +84,20 @@ COPY --from=node-deps /app/public/build ./public/build
 # Copy application code
 COPY . .
 
-# Fix permissions
-RUN chown -R www-data:www-data storage bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
+# Copy nginx, supervisord, and entrypoint configs
+COPY docker/nginx.conf.template /etc/nginx/nginx.conf.template
+COPY docker/supervisord.conf /etc/supervisord.conf
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+
+# Permissions, runtime dirs, entrypoint executable
+RUN chmod +x /usr/local/bin/entrypoint.sh \
+    && chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache \
+    && mkdir -p /run/nginx
+
+# Render injects $PORT at runtime; 10000 is the default for local runs
+ENV PORT=10000
+EXPOSE 10000
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["supervisord", "-c", "/etc/supervisord.conf"]
